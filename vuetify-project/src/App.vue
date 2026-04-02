@@ -32,14 +32,14 @@
           <v-app-bar-nav-icon @click="showHomePage()"></v-app-bar-nav-icon>
         </template>
         <v-app-bar-title>Some Vuetify App</v-app-bar-title>
-        <v-btn icon @click="showHelloWorldPage()">
-          <v-icon>mdi-web</v-icon>
+        <v-btn append-icon="mdi-web" color="green-darken-4" @click="showHelloWorldPage()">
+          Hello
         </v-btn>
-        <v-btn icon @click="showLinksPage()">
-          <v-icon>mdi-list-box</v-icon>
+        <v-btn append-icon="mdi-list-box" color="blue-darken-2" @click="showLinksPage()">
+          Links
         </v-btn>
-        <v-btn icon @click="showToDoPage()">
-          <v-icon>mdi-check-circle</v-icon>
+        <v-btn append-icon="mdi-check-circle" color="red-darken-2" @click="showToDoPage()">
+          Todos
         </v-btn>
       </v-app-bar>
 
