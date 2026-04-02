@@ -46,5 +46,12 @@ export default defineConfig({
   },
   server: {
     port: 3000,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5160', // .NET app URL
+        changeOrigin: true,            // Recommended for local proxying
+        secure: false
+      }
+    }
   },
 })
