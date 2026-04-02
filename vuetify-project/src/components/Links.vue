@@ -1,10 +1,34 @@
 <script setup lang="ts">
-  import { ref, type Ref } from 'vue'
-  import type { DisplayLink } from '@/models/displayLink';
-  import { GetAllLinks } from '@/functions/VariousFunctions';
+import { ref, type Ref, onMounted } from 'vue'
+import type { DisplayLink } from '@/models/displayLink';
 
-  const displayLinks: Ref<DisplayLink[]> = ref([] as DisplayLink[]);
-  displayLinks.value = GetAllLinks();
+const displayLinks: Ref<DisplayLink[]> = ref([] as DisplayLink[]);
+
+const error = ref<string | null>(null)
+async function fetchLinks() {
+
+  try {
+    const response = await fetch('/api/displaylink')
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`)
+    }
+
+    const data = await response.json() as DisplayLink[];
+    displayLinks.value = data;
+  }
+  catch (err) {
+    error.value = "Could not load tasks. Is the Backend running?"
+    console.error(err)
+  }
+  finally {
+  }
+}
+
+onMounted(() => {
+  fetchLinks();
+});
+
 </script>
 
 <template>
@@ -17,18 +41,9 @@
 
       <v-row>
         <v-col v-for="link in displayLinks" :key="link.href" cols="12">
-          <v-card
-            append-icon="mdi-open-in-new"
-            class="py-4"
-            :color="link.color"
-            :href="link.href"
-            rel="noopener noreferrer"
-            rounded="lg"
-            :subtitle="link.subtitle"
-            target="_blank"
-            :title="link.title"
-            variant="tonal"
-          >
+          <v-card append-icon="mdi-open-in-new" class="py-4" :color="link.color" :href="link.href"
+            rel="noopener noreferrer" rounded="lg" :subtitle="link.subtitle" target="_blank" :title="link.title"
+            variant="tonal">
             <template #prepend>
               <v-avatar class="ml-2 mr-4" :icon="link.icon" size="60" variant="tonal" />
             </template>
