@@ -1,11 +1,19 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, type Ref } from 'vue';
+import { ref } from 'vue'
 import HelloWorld from './components/HelloWorld.vue'
 import TheWelcome from './components/TheWelcome.vue'
+import TheList from './components/TheList.vue';
 
 const fullname = computed(() => {
   return 'John Doe';
 });
+
+const showWelcome: Ref<boolean, boolean> = ref(true);
+
+function toggleShowWelcome() {
+  showWelcome.value = !showWelcome.value
+}
 </script>
 
 <template>
@@ -14,12 +22,19 @@ const fullname = computed(() => {
 
     <div class="wrapper">
       <HelloWorld msg="You did it!" />
-      <span>Welcome, {{ fullname }}</span>
+    </div>
+    <div class="wrapper">
+      <button @click="toggleShowWelcome">Toggle</button>
     </div>
   </header>
 
   <main>
-    <TheWelcome />
+    <div v-if="showWelcome">
+      <TheWelcome />
+    </div>
+    <div v-else>
+      <TheList />
+    </div>
   </main>
 </template>
 
