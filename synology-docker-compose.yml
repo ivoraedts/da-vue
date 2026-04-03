@@ -1,0 +1,25 @@
+networks:
+  docker-da-vue:
+    driver: bridge
+
+services:
+  theweb-api:
+    image: ivoraedts/da-vue-theweb-api:latest
+    ports:
+      # <Host Port>:<Container Port>
+      - "5160:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_HTTP_PORTS=8080
+    networks:
+      - docker-da-vue
+
+  theweb-ui:
+    image: ivoraedts/da-vue-theweb-ui:latest
+    ports:
+    # <Host Port>:<Container Port>
+      - "3000:80"
+    depends_on:
+      - theweb-api
+    networks:
+      - docker-da-vue
