@@ -10,6 +10,7 @@ public class TodoController : ControllerBase
     [HttpGet]
     public ActionResult<List<TodoItem>> Get()
     {
+        Console.WriteLine("Received GET request for /api/todo");
         // This is your hardcoded list
         var items = new List<TodoItem>
         {

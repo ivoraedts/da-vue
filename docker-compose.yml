@@ -1,0 +1,27 @@
+services:
+  theweb-api:
+    build:
+      context: ./TheWeb.API
+      dockerfile: Dockerfile
+    ports:
+      - "5160:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+    networks:
+      - docker-da-vue
+
+  theweb-ui:
+    build:
+      context: ./vuetify-project
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - theweb-api
+    networks:
+      - docker-da-vue
+
+networks:
+  docker-da-vue:
+    driver: bridge
