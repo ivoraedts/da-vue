@@ -2,9 +2,9 @@
 import { ref, type Ref, onMounted } from 'vue'
 import type { TodoItem } from '@/models/todoItem';
 
-const todoItems = ref<TodoItem[]>([])
-const loading = ref(true)
-const error = ref<string | null>(null)
+const todoItems: Ref<TodoItem[]> = ref<TodoItem[]>([])
+const loading: Ref<boolean> = ref(true)
+const error: Ref<string | null> = ref(null)
 
 async function fetchTodos() {
   loading.value = true
@@ -18,7 +18,7 @@ async function fetchTodos() {
       throw new Error(`API error: ${response.status}`)
     }
     
-    const data = await response.json()
+    const data = await response.json() as TodoItem[]
     todoItems.value = data
   } catch (err) {
     error.value = "Could not load tasks. Is the Backend running?"
