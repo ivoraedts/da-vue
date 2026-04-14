@@ -1,39 +1,6 @@
 services:
-  theweb-api:
-    build:
-      context: ./TheWeb.API
-      dockerfile: Dockerfile
-    ports:
-      - "5160:8080"
-    depends_on:
-      postgres: 
-        condition: service_healthy
-        restart: true
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_HTTP_PORTS=8080
-    networks:
-      - docker-da-vue
-
-  theweb-ui:
-    build:
-      context: ./vuetify-project
-      dockerfile: Dockerfile
-    ports:
-      - "3000:80"
-    depends_on:
-      - theweb-api
-    networks:
-      - docker-da-vue
-
   postgres:
     image: postgres:latest
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d DaVueDb -U user-name -h localhost -p 5432"]
-      interval: 10s
-      retries: 5
-      start_period: 10s
-      timeout: 10s
     container_name: docker-da-vue.postgres
     #command: postgres -c max_connections=100
     volumes:  
