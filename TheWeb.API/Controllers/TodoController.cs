@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using TheWeb.API.Data;
 using TheWebApi.Models;
 
 namespace TheWebApi.Controllers;
@@ -7,17 +8,25 @@ namespace TheWebApi.Controllers;
 [Route("api/[controller]")] // This makes the URL: api/todo
 public class TodoController : ControllerBase
 {
+    private readonly DaVueDbContext _dbContext;
+
+    public TodoController(DaVueDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+
     [HttpGet]
-    public ActionResult<List<TodoItem>> Get()
+    public ActionResult<List<Models.TodoItem>> Get()
     {
         Console.WriteLine("Received GET request for /api/todo");
-        // This is your hardcoded list
-        var items = new List<TodoItem>
+
+        var todoItems = _dbContext.TodoItems.ToList();
+        var items = todoItems.Select(item => new Models.TodoItem
         {
-            new TodoItem { Id = 1, Task = "Learn Vue with .NET", IsCompleted = false },
-            new TodoItem { Id = 2, Task = "Configure VS Code", IsCompleted = true },
-            new TodoItem { Id = 3, Task = "Build an Awesome App", IsCompleted = false }
-        };
+            Id = item.Id,
+            Task = item.Task,
+            IsCompleted = item.IsCompleted
+        }).ToList();
 
         return Ok(items); // Returns a 200 OK status with the JSON list
     }
