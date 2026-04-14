@@ -277,6 +277,329 @@ services:
       - docker-da-vue
 ```
 
+## Connecting to a Database
+
+Due to some recent experience with [another project](https://github.com/ivoraedts/docker-mudblazor/) running on Docker / Synology with a database, I could repeat the same tricks on getting things to work including a database. In that case I was working with MudBlazor and combined it with PostgreSQL and PG Admin locally and with Adminer on the Synology (for easier installation).
+
+### Running PostgreSQL and PG Admin in Docker
+
+As I don't feel like local installations for this, I started again with just running PostgreSQL and PG Admin in Docker Desktop on such a way that I can later connect from both local and from within the same docker network. So, just for getting the database and administration to run, it resulted in this docker-compose file, that I have named ``docker-compose-db.yml``. For this I used the latest versions of:
+1. PostgreSQL (starting with the latest version of the [official image](https://hub.docker.com/_/postgres) )
+2. PG Admin (starting with the latest version of the [most pulled image](https://hub.docker.com/r/dpage/pgadmin4) )
+
+For both of them, I defined a volume mapping, so the data is stored on disk.
+So, when the containers and images are destroyed and replaced, the data will still be there.
+I added some simple username plus password for both postrgres and pgadmin.
+As I have no postgres or so running on the localhost, I have exposed the default port (5433).
+For pgadmin (which runs on 80, I defined the host port as 5051).
+```
+services:
+  postgres:
+    image: postgres:latest
+    container_name: docker-da-vue.postgres
+    #command: postgres -c max_connections=100
+    volumes:  
+    # This fix applies to version 18 and later. before it could mount to /var/lib/postgresql/data
+    # This fix applies to version 18 and later: mount to /var/lib/postgresql/docker works, but does not persist
+      - ./docker/pgdata:/var/lib/postgresql
+    networks:
+      - docker-da-vue
+    environment:
+      POSTGRES_USER: user-name
+      POSTGRES_PASSWORD: strong-password
+    ports:
+      # <Host Port>:<Container Port>
+      - "5433:5432"     
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: docker-da-vue.pgadmin
+    volumes:
+      - ./docker/pgadmin:/var/lib/pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: user-name@domain-name.com
+      PGADMIN_DEFAULT_PASSWORD: strong-password
+    networks:
+      - docker-da-vue
+    ports:
+      # <Host Port>:<Container Port>
+      - "5051:80"
+
+networks:
+  docker-da-vue:
+    driver: bridge
+```
+
+So when running ``docker compose -f docker-compose-local.yml up`` , the images are downloaded and pushed into containers within the same network.
+When opening PG Admin via the ``http://localhost:5051/``, you must use the login and password from the dockerfile. (so ``user-name@domain-name.com`` as login and ``strong-password`` as password).
+Then via Servers, add a new Registry to the postgres database. Then you can connect via the servicename ``postgres`` over port ``5432`` via username ``user-name`` and ``strong-password`` as password.
+If this all works, you can create a database and if desired a table in it.
+
+### Accessing the Database from the Local Web Api application
+
+Off course it's nice to arrange the data access via Entity Framework Core, so I added references to ``Microsoft.EntityFrameworkCore``, ``Microsoft.EntityFrameworkCore.Tools`` and ``Npgsql.EntityFrameworkCore.PostgreSQL``.
+In order to be able to access the database from the server-part of the application, some trivial things need to be added to the MyApplication (Server-part) project.
+As I did some stuff with TodoItems, I made a data folder and a TodoItem class in it to define the columns of the new table.
+
+```
+namespace TheWeb.API.Data;
+
+public class TodoItem
+{
+    public long Id { get; set; }
+    public required string Task { get; set; }
+    public bool IsCompleted { get; set; }
+}
+```
+
+Then it's time to add a Database context and add a DbSet of that type. I named it ``DaVueDbContext`` :
+```
+using Microsoft.EntityFrameworkCore;
+
+namespace TheWeb.API.Data
+{
+    public class DaVueDbContext : DbContext
+    {
+        protected readonly IConfiguration Configuration;
+
+        public DaVueDbContext(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder options)
+        {
+            var connectionString = Configuration.GetConnectionString("DaVueDb");
+            options.UseNpgsql(connectionString);
+        }
+
+        public DbSet<TodoItem> TodoItems { get; set; }
+    }
+
+    public static class ServiceCollectionExtensions
+    {
+        public static IServiceCollection AddDaVueDbContext(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddDbContext<DaVueDbContext>(options =>
+                options.UseNpgsql(configuration.GetConnectionString("DaVueDb"),
+                npgsqlOptions => npgsqlOptions.EnableRetryOnFailure()
+                )
+            );
+            return services;
+        }
+    }
+}
+```
+
+That DbSet of TodoItem, named TodoItems, will ensure there is going to be a table, named TodoItems. (after migrations)
+To wire it up, in the ``Program.cs``, I added:
+```
+builder.Services.AddDaVueDbContext(builder.Configuration);
+```
+
+before ``var app = builder.Build();`` and after that I added:
+```
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<DaVueDbContext>();
+    dbContext.Database.Migrate();
+}
+```
+
+that Migrate() line makes sure the migrations will be run on start-up.
+
+Then in ``appsettings.json`` // ``appsettings.Development.json`` I need to add the connection string that I want to use for making a connection from my local-running Application.
+In order to connect from my local-running application to the postgres database running on my local docker, I must use port 5433 that I exposed, so it looks like:
+
+```
+    "ConnectionStrings": {
+    "DaVueDb": "Host=localhost:5433;Database=DaVueDb;Username=user-name;Password=strong-password"
+  }
+```
+Keep in mind, that in the later stage, when MudBlazor also runs in docker, we can directly connect to ``Host=postgres:5432;`` , like how we connected from PgAdmin to PostgresQL before. So that is how we connect it in the regular ``appsettings.json``.
+
+And than from the Power Shell, I needed to first install the Entitiy Framework tooling:
+```
+dotnet tool install --global dotnet-ef
+```
+and then add that migration:
+```
+dotnet ef migrations add InitialDatbaseMigration
+```
+
+Then if all went well, running the application should result in running the migrations.
+But before running, you should first arrange that the database exist (which you can do via pgadmin).
+
+### Accessing the Database from the MudBlazor application running in Docker
+
+Instead of connecting to the database via ``localhost:5433`` as configured in ``appsettings.Development.json``, we can now arrange that we connect via ``postgres:5432`` as configured in ``appsettings.json``.
+This is arranged in the Docker-Compose file and for this, we use a docker-network that we named ``docker-da-vue``.
+Also we specify that theweb-api service runs in Production mode, so it uses the regular ``appsettings.json``.
+As we learned from previous chicken-egg problems, we define that theweb-api depends on the postgres service. And in that postgres service we define a health check.
+
+```
+services:
+  theweb-api:
+    build:
+      context: ./TheWeb.API
+      dockerfile: Dockerfile
+    ports:
+      - "5160:8080"
+    depends_on:
+      postgres: 
+        condition: service_healthy
+        restart: true
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_HTTP_PORTS=8080
+    networks:
+      - docker-da-vue
+
+  theweb-ui:
+    build:
+      context: ./vuetify-project
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - theweb-api
+    networks:
+      - docker-da-vue
+
+  postgres:
+    image: postgres:latest
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d DaVueDb -U user-name -h localhost -p 5432"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+      timeout: 10s
+    container_name: docker-da-vue.postgres
+    #command: postgres -c max_connections=100
+    volumes:  
+    # This fix applies to version 18 and later. before it could mount to /var/lib/postgresql/data
+    # This fix applies to version 18 and later: mount to /var/lib/postgresql/docker works, but does not persist
+      - ./docker/pgdata:/var/lib/postgresql
+    networks:
+      - docker-da-vue
+    environment:
+      POSTGRES_USER: user-name
+      POSTGRES_PASSWORD: strong-password
+    ports:
+      # <Host Port>:<Container Port>
+      - "5433:5432"     
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: docker-da-vue.pgadmin
+    volumes:
+      - ./docker/pgadmin:/var/lib/pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: user-name@domain-name.com
+      PGADMIN_DEFAULT_PASSWORD: strong-password
+    networks:
+      - docker-da-vue
+    ports:
+      # <Host Port>:<Container Port>
+      - "5051:80"
+
+networks:
+  docker-da-vue:
+    driver: bridge
+```
+
+Then via Power Shell you can build and run the application as follows:
+```
+docker compose -f docker-compose.yml build
+```
+```
+docker compose -f docker-compose.yml up
+```
+
+### Accessing the Database from the Da Vue application running in Container Manager on the Synology
+
+So, the first thing to do after those migrations were added to the code, is similar to how we earlier published the application image to the [Docker Hub](https://hub.docker.com/) via the Containers tab of Visual Studio Code.
+Note that we only need to push the [theweb-api image](https://hub.docker.com/repository/docker/ivoraedts/da-vue-theweb-api), as the postgres and pgadmin images are already present in the Docker Hub and theweb-au image is not modified.
+On the Synology on the Container Manager we will use the Project-tab to get this to work.
+
+From the Project Tab, you can create a new project by clicking on Create (or Maken in Dutch 😁).
+Then you give the project a name, like ``da-vue``, you can define the root-path / volume of the project, like ``/volume1/docker/da-vue``, and can choose to create a new docker-compose.yml.
+This is similar to the docker-compose files that we were using for getting things to work on Docker Desktop.
+Only now the volumes will be relative to the project-volume.
+So when I mount postgres on ``./docker/pgdata`` I can find the data on ``/volume1/docker/da-vue/docker/pgdata``.
+This is nice, so if you run more projects, the volumes are not mixed in the same folders.
+Make sure the folder exists before starting... So go to File Station and create the folders. (so docker in the root, then da-vue and then pgdata)
+
+So I ended up with the following docker-compose project yml that I have stored in git as ``synology-docker-compose-yml``:
+```
+services:
+  theweb-api:
+    image: ivoraedts/da-vue-theweb-api:latest
+    ports:
+      # <Host Port>:<Container Port>
+      - "5160:8080"
+    depends_on:
+      postgres: 
+        condition: service_healthy
+        restart: true
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_HTTP_PORTS=8080
+    networks:
+      - docker-da-vue
+
+  theweb-ui:
+    image: ivoraedts/da-vue-theweb-ui:latest
+    ports:
+    # <Host Port>:<Container Port>
+      - "3000:80"
+    depends_on:
+      - theweb-api
+    networks:
+      - docker-da-vue
+
+  postgres:
+    image: postgres:latest
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d DaVueDb -U user-name -h localhost -p 5432"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+      timeout: 10s
+    container_name: docker-da-vue.postgres
+    #command: postgres -c max_connections=100
+    volumes:  
+    # This fix applies to version 18 and later. before it could mount to /var/lib/postgresql/data
+    # This fix applies to version 18 and later: mount to /var/lib/postgresql/docker works, but does not persist
+      - ./docker/pgdata:/var/lib/postgresql
+    networks:
+      - docker-da-vue
+    environment:
+      POSTGRES_USER: user-name
+      POSTGRES_PASSWORD: strong-password
+    ports:
+      # <Host Port>:<Container Port>
+      - "5433:5432"
+
+  adminer:
+    image: adminer:latest
+    container_name: docker-da-vue.adminer    
+    networks:
+      - docker-da-vue
+    ports:
+      # <Host Port>:<Container Port>
+      - "8081:8080"
+
+networks:
+  docker-da-vue:
+    driver: bridge
+```
+
+As I am not sure if I will use postgres from the outside, I decided to map the port to 5433. But maybe I could remove that mapping as well and prevent access from the outside.
+Then for Adminer, I just mapped the 8081 to 8080, so over that port I can access adminer.
+The web app itself is accesible of port 3000 and even the API is directly accesible over port 5160.
+Off course for security reasons, you could remove the port mappings for the API and postgresql.
+
 ## Commenting the stuff in GitHub
 
 When making all this documentation, I sometimes peaked at this documentation of the [markdown stuff](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax).
