@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import HelloWorld from '@/components/HelloWorld.vue'
+  import About from '@/components/About.vue'
   import Links from '@/components/Links.vue'
   import Todo from '@/components/Todo.vue'
   import { ref, type Ref  } from 'vue'
@@ -7,7 +7,7 @@
   const showPage: Ref<string, string> = ref("home");
   showPage.value = "hello world page";
 
-  function showHelloWorldPage() {
+  function showAboutPage() {
     showPage.value = "hello world page";
   }
 
@@ -31,8 +31,8 @@
         <template v-slot:prepend>
           <v-app-bar-nav-icon @click="showHomePage()"></v-app-bar-nav-icon>
         </template>
-        <v-app-bar-title>Some Vuetify App</v-app-bar-title>
-        <v-btn append-icon="mdi-web" color="green-darken-4" @click="showHelloWorldPage()">
+        <v-app-bar-title>Da Vue</v-app-bar-title>
+        <v-btn append-icon="mdi-information-outline" color="green-darken-4" @click="showAboutPage()">
           Hello
         </v-btn>
         <v-btn append-icon="mdi-list-box" color="blue-darken-2" @click="showLinksPage()">
@@ -44,7 +44,7 @@
       </v-app-bar>
 
       <div v-if="showPage==='hello world page'" >
-        <HelloWorld />  
+        <About />  
       </div>
       <div v-else-if="showPage==='home'">
         <h1>Home Page</h1>
