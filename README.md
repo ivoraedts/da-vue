@@ -3,6 +3,10 @@
 ## About Da-Vue
 
 It was about time to play around a bit with Vue. And by adding Da in front, it sounds like a Vietnames city. 🇻🇳 - Like Da Lat, which I visited in 2014. Just for fun and for reminding that Vietnam was a very interesting country to see and experience.
+<p align="center" width="100%">
+    <img width="40%" src="images/DaLat-22dec2014.JPG">
+</p>
+
 
 ## Combining the following topics
 - Vue.JS
@@ -11,6 +15,10 @@ It was about time to play around a bit with Vue. And by adding Da in front, it s
 - .NET 10 of ASP.NET API
 - Docker
 - Synology
+
+<p align="center" width="100%">
+    <img width="50%" src="vuetify-project/src/assets/logo-small.png">
+</p>
 
 ## Getting Started
 
