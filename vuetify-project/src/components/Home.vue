@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, type Ref, onMounted, computed } from 'vue'
 import type { TadoInitialization } from '@/models/TadoInitialization';
+import type { ActualTadoData } from '@/models/ActualTadoData'
 
 const stepperIsActive: Ref<boolean> = ref(false);
 const stepperIsDisabled: Ref<boolean> = ref(false);
@@ -24,7 +25,7 @@ const handleNext = () => {
     if (currentStep.value === 1) {
         fetchUrl();
     } else if (currentStep.value === 2) {
-        //todo: validate that the user has completed the authorisation process by checking for a valid access token or similar
+        authenticateCommunication();
     }
 
     currentStep.value++
@@ -43,9 +44,26 @@ async function fetchUrl()
       throw new Error(`API error: ${response.status}`)
     }
 
-    const data = await response.json() as TadoInitialization
+    const data = await response.json() as TadoInitialization;
     TadoInitializationData.value = data;
+}
 
+const canStartStepper3 = computed(() => !stepperIsActive.value && !stepperIsDisabled.value);
+const ActualDataIsVisible = computed<boolean>(() => ActualTadoData.value !== null);    
+const ActualTadoData: Ref<ActualTadoData | null> = ref(null);
+    
+
+async function authenticateCommunication()
+{
+    // Vite proxies '/api/tadotemperature/authenticate' to 'http://localhost:5160/api/tadotemperature/authenticate'
+    const response = await fetch('/api/tadotemperature/authenticate/'+TadoInitializationData.value?.communicationId);
+
+    if (!response.ok) {
+        throw new Error(`API error: ${response.status}`)
+    }
+
+    const data = await response.json() as ActualTadoData;
+    ActualTadoData.value = data;
 }
 
 </script>
@@ -113,8 +131,15 @@ async function fetchUrl()
                             <v-row>
                                 <v-col cols="12" class="text-center">
                                     <h2>Step Three: Complete Initialisation</h2>
-                                    <p>This should show some data to prove correctness and an interval to specify for tracking.</p>
-                                    <p>Click Finish to complete the initialisation process and start tracking your Tado temperatures.</p>
+                                    <div v-if="!ActualDataIsVisible">
+                                        <p>This should show some data to prove correctness and an interval to specify for tracking.</p>
+                                        <p>Click Finish to complete the initialisation process and start tracking your Tado temperatures.</p>
+                                    </div>
+                                    <div v-else>
+                                        <p>We got some data. 
+                                            The temperature is {{ ActualTadoData?.insideTemperatureCelsius }} degrees Celsius.</p>
+                                        <p>The Humidity is {{ ActualTadoData?.humidityPercentage }} %</p>    
+                                    </div>
                                 </v-col>
                             </v-row>
                         </v-card>
