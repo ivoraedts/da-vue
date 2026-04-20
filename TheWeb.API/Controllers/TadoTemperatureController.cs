@@ -1,7 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
-using TheWebApi.Models;
 using KoenZomers.Tado.Api.Controllers;
-
+using Microsoft.AspNetCore.Mvc;
+using TheWeb.API.Data;
+using TheWebApi.Models;
 
 namespace TheWebApi.Controllers;
 
@@ -10,10 +10,12 @@ namespace TheWebApi.Controllers;
 public class TadoTemperatureController : ControllerBase
 {
     private readonly Tado _tadoService;
+    private readonly DaVueDbContext _dbContext;
 
-    public TadoTemperatureController(Tado tado)
+    public TadoTemperatureController(Tado tado, DaVueDbContext dbContext)
     {
         _tadoService = tado;
+        _dbContext = dbContext;
     }
 
     [HttpGet]
@@ -26,12 +28,24 @@ public class TadoTemperatureController : ControllerBase
             return NotFound();
         }
 
-        var fakeResult = new TadoInitialization
+        var newDeviceAuthorization = new TheWeb.API.Data.TadoDeviceAuthentication
         {
-            CommunicationId = 1235,
-            VerificationUriComplete = $"{deviceAuthorization.VerificationUriComplete}",
-            UserCode = $"{deviceAuthorization.UserCode}"
+           Creation = DateTime.UtcNow,
+           DeviceCode = $"{deviceAuthorization.DeviceCode}",
+           ExpiresIn = (deviceAuthorization.ExpiresIn == null) ? (short) 0 : deviceAuthorization.ExpiresIn.Value,
+           Interval = (deviceAuthorization.Interval == null) ? (short) 0 : deviceAuthorization.Interval.Value,
+           UserCode = $"{deviceAuthorization.UserCode}",
+           VerificationUri = $"{deviceAuthorization.VerificationUri}",
+           VerificationUriComplete = $"{deviceAuthorization.VerificationUriComplete}",
         };
-        return Ok(fakeResult); // Returns a 200 OK status with the JSON object
+        _dbContext.TadoDeviceAuthentications.Add(newDeviceAuthorization);
+        await _dbContext.SaveChangesAsync();
+        
+        return Ok(new TadoInitialization
+        {
+            CommunicationId = newDeviceAuthorization.CommunicationId,
+            VerificationUriComplete = newDeviceAuthorization.VerificationUriComplete,
+            UserCode = newDeviceAuthorization.UserCode
+        }); // Returns a 200 OK status with the JSON object
     }
 }
