@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, type Ref, onMounted, computed } from 'vue'
+import type { TadoInitialization } from '@/models/TadoInitialization';
 
 const stepperIsActive: Ref<boolean> = ref(false);
 const stepperIsDisabled: Ref<boolean> = ref(false);
@@ -20,8 +21,31 @@ const handleNext = () => {
   if (currentStep.value === 3) {
     alert("Form Submitted!");
   } else {
+    if (currentStep.value === 1) {
+        fetchUrl();
+    } else if (currentStep.value === 2) {
+        //todo: validate that the user has completed the authorisation process by checking for a valid access token or similar
+    }
+
     currentStep.value++
   }
+}
+
+const TadoInitializationData: Ref<TadoInitialization | null> = ref(null);
+const InitializationUrl = computed<string>(() => TadoInitializationData.value ? TadoInitializationData.value.verificationUriComplete : 'not available');
+
+async function fetchUrl()
+{
+    // Vite proxies '/api/tadotemperature/get-new-url' to 'http://localhost:5160/api/tadotemperature/get-new-url'
+    const response = await fetch('/api/tadotemperature/get-new-url')
+    
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`)
+    }
+
+    const data = await response.json() as TadoInitialization
+    TadoInitializationData.value = data;
+
 }
 
 </script>
@@ -78,7 +102,7 @@ const handleNext = () => {
                                 <v-col cols="12" class="text-center">
                                     <h2>Step Two: Authorise Tado Account</h2>
                                     <p>To authorise your Tado account, click the link below and follow the instructions and click Next when done.</p>
-                                    <a href="https://my.tado.com/oauth/authorize?client_id=da-vue&response_type=code&scope=home.user:read%20home.user:write%20home.thermostat:read%20home.thermostat:write%20home.location:read%20home.location:write" target="_blank">Authorise Tado Account</a>
+                                    <a :href="InitializationUrl" target="_blank">{{ InitializationUrl }}</a>
                                 </v-col>
                             </v-row>
                         </v-card>
