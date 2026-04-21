@@ -5,7 +5,7 @@ namespace TheWebApi.Models
         public required int HomeId { get; set; }
         public required double InsideTemperatureCelsius { get; set; }
         public required double HumidityPercentage { get; set; }
-        public required string AccessToken { get; set; }
-        public required string RefreshToken { get; set; }
+        public required int TokenId { get; set; }
+        public required string ZoneName { get; set; }
     }
 }

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TheWeb.API.Data;
@@ -11,9 +12,11 @@ using TheWeb.API.Data;
 namespace TheWeb.API.Migrations
 {
     [DbContext(typeof(DaVueDbContext))]
-    partial class DaVueDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260421085232_addTadoTokens")]
+    partial class addTadoTokens
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

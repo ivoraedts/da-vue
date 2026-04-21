@@ -77,27 +77,44 @@ public class TadoTemperatureController : ControllerBase
         {
             throw new InvalidOperationException($"Failed to wait for token response");
         }
-        
+
+        var newToken = new TadoToken
+        {
+            AccessToken = $"{tokenResponse.AccessToken}",
+            RefreshToken = $"{tokenResponse.RefreshToken}",
+            ExpiresIn = tokenResponse.ExpiresIn ?? 0,
+            Scope = $"{tokenResponse.Scope}",
+            TokenType = $"{tokenResponse.TokenType}",
+            UserId = $"{tokenResponse.UserId}"
+        };
+        _dbContext.TadoTokens.Add(newToken);
+        await _dbContext.SaveChangesAsync();
+
         _tadoService.Authenticate(tokenResponse);
         var me = await _tadoService.GetMe();
         var homeId = (int)me.Homes.Single().Id;
         var zones = await _tadoService.GetZones(homeId);
 
+        var zoneName = string.Empty;
         var insiteTemperature = (double) 0;
         var humidityPercentage = (double) 0;
 
         foreach (var zone in zones)
         {
+            zoneName = zone.Name;
             var state = await _tadoService.GetZoneState(homeId, (short)zone.Id);
             if (state != null && state.SensorDataPoints != null && state.SensorDataPoints.InsideTemperature != null)
             {
-                Console.Write($"Temp: {state.SensorDataPoints.InsideTemperature.Celsius}°C");
                 insiteTemperature = state.SensorDataPoints.InsideTemperature.Celsius.Value;
             }
             if (state != null && state.SensorDataPoints != null && state.SensorDataPoints.Humidity != null)
             {
-                Console.Write($"Humidity: {state.SensorDataPoints.Humidity.Percentage} %");
                 humidityPercentage = state.SensorDataPoints.Humidity.Percentage.Value;
+            }
+
+            if (insiteTemperature != 0 && humidityPercentage != 0)
+            {
+                break; // Exit the loop if we have valid temperature and humidity values
             }
         }
 
@@ -106,9 +123,8 @@ public class TadoTemperatureController : ControllerBase
             HomeId = homeId,
             InsideTemperatureCelsius = insiteTemperature,
             HumidityPercentage = humidityPercentage,
-            AccessToken = $"{tokenResponse.AccessToken}",
-            RefreshToken = $"{tokenResponse.RefreshToken}",
-
+            TokenId = newToken.TokenId,
+            ZoneName = $"{zoneName}",
         }); // Returns a 200 OK status with the JSON object
     }
 }

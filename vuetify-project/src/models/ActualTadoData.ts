@@ -2,6 +2,6 @@ export interface ActualTadoData {
   homeId: number
   insideTemperatureCelsius: number
   humidityPercentage: number
-  accessToken: string
-  refreshToken: string
+  tokenId: number
+  zoneName: string
 }

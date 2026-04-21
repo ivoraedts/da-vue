@@ -52,7 +52,6 @@ const canStartStepper3 = computed(() => !stepperIsActive.value && !stepperIsDisa
 const ActualDataIsVisible = computed<boolean>(() => ActualTadoData.value !== null);    
 const ActualTadoData: Ref<ActualTadoData | null> = ref(null);
     
-
 async function authenticateCommunication()
 {
     // Vite proxies '/api/tadotemperature/authenticate' to 'http://localhost:5160/api/tadotemperature/authenticate'
@@ -65,6 +64,10 @@ async function authenticateCommunication()
     const data = await response.json() as ActualTadoData;
     ActualTadoData.value = data;
 }
+
+  const min = ref(1)
+  const max = ref(120)
+  const slider = ref(60)
 
 </script>
 
@@ -136,9 +139,34 @@ async function authenticateCommunication()
                                         <p>Click Finish to complete the initialisation process and start tracking your Tado temperatures.</p>
                                     </div>
                                     <div v-else>
-                                        <p>We got some data. 
-                                            The temperature is {{ ActualTadoData?.insideTemperatureCelsius }} degrees Celsius.</p>
-                                        <p>The Humidity is {{ ActualTadoData?.humidityPercentage }} %</p>    
+                                        <p>We successfully retrieved the Tado data. See here some actual values:</p>
+                                        <li>The Zone Name is {{ ActualTadoData?.zoneName }}</li>
+                                        <li>The temperature is {{ ActualTadoData?.insideTemperatureCelsius }} degrees Celsius.</li>
+                                        <li>The Humidity is {{ ActualTadoData?.humidityPercentage }} %</li>
+                                        <li>The (Tado) Home ID is {{ ActualTadoData?.homeId }}</li>
+                                        <li>The Token is stored in our database and the ID is {{ ActualTadoData?.tokenId }}</li>
+                                        <p>Set the tracking interval and click Finish to complete the initialisation process and start tracking your Tado temperatures.</p>
+                                        <v-slider
+                                            v-model="slider"
+                                            :max="max"
+                                            :min="min"
+                                            :step="1"
+                                            class="align-center"
+                                            hide-details
+                                            color="green"
+                                            thumb-color="orange"
+                                        >
+                                            <template v-slot:append>
+                                            <v-text-field
+                                                v-model="slider"
+                                                density="compact"
+                                                style="width: 70px"
+                                                type="number"
+                                                hide-details
+                                                single-line
+                                            ></v-text-field>
+                                            </template>
+                                        </v-slider>
                                     </div>
                                 </v-col>
                             </v-row>
