@@ -1,11 +1,8 @@
-using TheWeb.API.Data;
-using Microsoft.EntityFrameworkCore;
-using KoenZomers.Tado.Api.Controllers;
-
 public class RunScheduledRetrievals : BackgroundService
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly ILogger<RunScheduledRetrievals> _logger;
+    const int DelayInSeconds = 5;
 
     public RunScheduledRetrievals(IServiceScopeFactory serviceScopeFactory, ILogger<RunScheduledRetrievals> logger)
     {
@@ -15,9 +12,8 @@ public class RunScheduledRetrievals : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Background Service is starting.");
-         // Wait 5 seconds for the database/app to stabilize
-        await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+        _logger.LogInformation($"Background Service is starting in {DelayInSeconds} seconds.");
+        await Task.Delay(TimeSpan.FromSeconds(DelayInSeconds), stoppingToken);
         _logger.LogInformation("Background Service is started.");
 
         // Loop until the application is shut down
@@ -28,10 +24,10 @@ public class RunScheduledRetrievals : BackgroundService
             try 
             {
                 // Perform your background task here
-                await DoWorkAsync(stoppingToken);
+                var nextRetrievalTime = await DoWorkAsync(stoppingToken);
 
-                // Wait for a specific interval before running again
-                await Task.Delay(TimeSpan.FromSeconds(60), stoppingToken);
+                _logger.LogInformation($"Next retrieval time is at: {nextRetrievalTime:O}, so waiting for {nextRetrievalTime - DateTime.UtcNow}." );
+                await Task.Delay(nextRetrievalTime - DateTime.UtcNow, stoppingToken);
             }
             catch (OperationCanceledException)
             {
@@ -41,18 +37,20 @@ public class RunScheduledRetrievals : BackgroundService
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred in the background service.");
+                await Task.Delay(TimeSpan.FromSeconds(DelayInSeconds), stoppingToken);
             }
         }
 
         _logger.LogInformation("Background Service is stopping.");
     }
 
-    private async Task DoWorkAsync(CancellationToken stoppingToken)
+    private async Task<DateTime> DoWorkAsync(CancellationToken stoppingToken)
     {
         using (var scope = _serviceScopeFactory.CreateScope())
         {
             var dataRetrievalService = scope.ServiceProvider.GetRequiredService<IDataRetrievalService>();
-            await dataRetrievalService.RetrieveDataAsync(stoppingToken);
+            var nextRetrievalTime = await dataRetrievalService.RetrieveDataAsync(stoppingToken);
+            return nextRetrievalTime;
         }
     }
 }

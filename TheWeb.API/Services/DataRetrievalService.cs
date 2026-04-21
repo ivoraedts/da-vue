@@ -5,7 +5,7 @@ using TheWeb.API.Data;
 
 public interface IDataRetrievalService
 {
-    Task RetrieveDataAsync(CancellationToken cancellationToken);
+    Task<DateTime> RetrieveDataAsync(CancellationToken cancellationToken);
 }
 
 public class DataRetrievalService : IDataRetrievalService
@@ -21,9 +21,10 @@ public class DataRetrievalService : IDataRetrievalService
         _dbContext = dbContext;
     }
 
-    public async Task RetrieveDataAsync(CancellationToken cancellationToken)
+    public async Task<DateTime> RetrieveDataAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Starting data retrieval at: {time}", DateTimeOffset.Now);
+        var nextRetrievalTimeInCaseOfError = DateTime.UtcNow.AddMinutes(5); // In case something goes wrong
 
         try
         {
@@ -31,19 +32,19 @@ public class DataRetrievalService : IDataRetrievalService
             if (activeSchedule == null)
             {
                 _logger.LogInformation("No active retrieval schedule found. Skipping data retrieval.");
-                return;
+                return nextRetrievalTimeInCaseOfError;
             }
 
             if (activeSchedule.NextRetrievalTime > DateTimeOffset.Now)
             {
                 _logger.LogInformation("Next retrieval time is in the future ({time}). Skipping data retrieval.", activeSchedule.NextRetrievalTime);
-                return;
+                return activeSchedule.NextRetrievalTime;
             }
 
             var token = await _dbContext.TadoTokens.FirstOrDefaultAsync(t => t.TokenId == activeSchedule.TokenId);
             if (token == null)            {
                 _logger.LogWarning("Token with ID {tokenId} not found. Skipping data retrieval.", activeSchedule.TokenId);
-                return;
+                return nextRetrievalTimeInCaseOfError;
             }
 
             var tadoToken = new Token
@@ -58,34 +59,32 @@ public class DataRetrievalService : IDataRetrievalService
 
             if (!_tadoService.Authenticate(tadoToken))
             {
-                _logger.LogWarning("TODO: Refresh token logic not implemented. Failed to authenticate with Tado using token ID {tokenId}. Skipping data retrieval.", activeSchedule.TokenId);
-                return;
+                _logger.LogWarning($"Something is wrong with the token related to token {activeSchedule.TokenId}. Even after expiring, this is not the point where things should go wrong. Skipping data retrieval.");
+                return nextRetrievalTimeInCaseOfError;
             }
 
         var me = await _tadoService.GetMe();
 
         if (me == null || me.Homes == null || me.Homes.Length == 0)
         {
-            //probably this is where I need that refresh token...
-            _logger.LogWarning("No homes found for the authenticated user.");
-
+            _logger.LogWarning($"Token is expired and needs a refresh. Attempting to refresh the token for token ID {activeSchedule.TokenId}.");
             tadoToken = await _tadoService.GetAccessTokenWithRefreshToken(tadoToken.RefreshToken, cancellationToken);
 
             if (tadoToken == null)
             {
                 _logger.LogWarning("Failed to refresh token. Skipping data retrieval.");
-                return;
+                return nextRetrievalTimeInCaseOfError;
             }
             if (!_tadoService.Authenticate(tadoToken))
             {
                 _logger.LogWarning("Despite the refresh token being obtained, failed to authenticate with Tado using token ID {tokenId}. Skipping data retrieval.", activeSchedule.TokenId);
-                return;
+                return nextRetrievalTimeInCaseOfError;
             }
             me = await _tadoService.GetMe();
             if (me == null || me.Homes == null || me.Homes.Length == 0)
             {
                 _logger.LogWarning("Even after refreshing the token, no homes found for the authenticated user. Skipping data retrieval.");
-                return;
+                return nextRetrievalTimeInCaseOfError;
             }
 
             token.AccessToken = $"{tadoToken.AccessToken}";
@@ -104,7 +103,7 @@ public class DataRetrievalService : IDataRetrievalService
         if(zones == null || zones.Length == 0)
         {
             _logger.LogWarning("No zones found for the home.");
-            return;
+            return nextRetrievalTimeInCaseOfError;
         }
 
         var zoneName = string.Empty;
@@ -143,12 +142,24 @@ public class DataRetrievalService : IDataRetrievalService
         _dbContext.TadoRetrievedData.Add(newRetrievedData);
         await _dbContext.SaveChangesAsync();
 
+        activeSchedule.NextRetrievalTime = activeSchedule.NextRetrievalTime.AddMinutes(activeSchedule.Interval);
+        if (activeSchedule.NextRetrievalTime < DateTime.UtcNow)
+        {
+            //for some reason it was really late, so the calculated next retrieval time is already in the past. To avoid multiple quick retrievals, we set the next retrieval time to now + interval.
+            activeSchedule.NextRetrievalTime = DateTime.UtcNow.AddMinutes(activeSchedule.Interval);
+        }
+
+        activeSchedule.LastRetrievalTime = DateTime.UtcNow;
+        _dbContext.TadoRetrievalSchedules.Update(activeSchedule);
+        await _dbContext.SaveChangesAsync();
 
             _logger.LogInformation("Data retrieval completed successfully at: {time}", DateTimeOffset.Now);
+            return activeSchedule.NextRetrievalTime;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "An error occurred during data retrieval.");
+            return nextRetrievalTimeInCaseOfError;
         }
     }
 }
