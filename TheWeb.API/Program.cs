@@ -6,7 +6,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddTadoServices();
 builder.Services.AddDaVueDbContext(builder.Configuration);
-builder.Services.AddControllers(); 
+builder.Services.AddControllers();
+builder.Services.AddTransient<IDataRetrievalService, DataRetrievalService>();
+builder.Services.AddHostedService<RunScheduledRetrievals>();
 
 var app = builder.Build();
 
