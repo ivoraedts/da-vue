@@ -59,7 +59,7 @@ public class TadoTemperatureController : ControllerBase
         var storedDeviceAuthorization = await _dbContext.TadoDeviceAuthentications.FirstOrDefaultAsync(d => d.CommunicationId==communicationId);
         if (storedDeviceAuthorization == null)
         {
-            return NotFound();
+            return NotFound("Device authorization not found");
         }
 
         var dev_auth_resp = new DeviceAuthorizationResponse
@@ -75,7 +75,7 @@ public class TadoTemperatureController : ControllerBase
         var tokenResponse = await _tadoService.WaitForDeviceCodeAuthenticationToComplete(dev_auth_resp, CancellationToken.None);
         if (tokenResponse == null)
         {
-            throw new InvalidOperationException($"Failed to wait for token response");
+            return NotFound("Token response not found. Authentication might not be completed yet.");
         }
 
         var newToken = new TadoToken
@@ -92,11 +92,21 @@ public class TadoTemperatureController : ControllerBase
 
         if (!_tadoService.Authenticate(tokenResponse))
         {
-            return Unauthorized();
+            return Unauthorized("Failed to authenticate with Tado.");
         }
         var me = await _tadoService.GetMe();
-        var homeId = (int)me.Homes.Single().Id;
+        if (me == null || me.Homes == null || me.Homes.Length == 0)
+        {
+            return NotFound("No homes found for the authenticated user.");
+        }
+
+        var homeId = Convert.ToInt32(me.Homes.Single().Id??0);
         var zones = await _tadoService.GetZones(homeId);
+
+        if(zones == null || zones.Length == 0)
+        {
+            return NotFound("No zones found for the home.");
+        }
 
         var zoneName = string.Empty;
         var insiteTemperature = (double) 0;
@@ -105,12 +115,12 @@ public class TadoTemperatureController : ControllerBase
         foreach (var zone in zones)
         {
             zoneName = zone.Name;
-            var state = await _tadoService.GetZoneState(homeId, (short)zone.Id);
-            if (state != null && state.SensorDataPoints != null && state.SensorDataPoints.InsideTemperature != null)
+            var state = await _tadoService.GetZoneState(homeId, Convert.ToInt16(zone.Id));
+            if (state != null && state.SensorDataPoints != null && state.SensorDataPoints.InsideTemperature != null && state.SensorDataPoints.InsideTemperature.Celsius != null)
             {
                 insiteTemperature = state.SensorDataPoints.InsideTemperature.Celsius.Value;
             }
-            if (state != null && state.SensorDataPoints != null && state.SensorDataPoints.Humidity != null)
+            if (state != null && state.SensorDataPoints != null && state.SensorDataPoints.Humidity != null && state.SensorDataPoints.Humidity.Percentage != null)
             {
                 humidityPercentage = state.SensorDataPoints.Humidity.Percentage.Value;
             }
@@ -131,14 +141,14 @@ public class TadoTemperatureController : ControllerBase
         }); // Returns a 200 OK status with the JSON object
     }
 
-    [Route("addSchedule")] // This makes the URL: api/tadotemperature/addSchedule/{communicationId}
+    [Route("addSchedule")] // This makes the URL: api/tadotemperature/addSchedule
     [HttpPost]
     public async Task<ActionResult<CreatedTadoSchedule>> AddTrackingSchedule([FromBody] SetSchedule setSchedule)
     {
         var token = await _dbContext.TadoTokens.FirstOrDefaultAsync(t => t.TokenId == setSchedule.TokenId);
         if (token == null)
         {
-            return NotFound();
+            return NotFound("Token not found. Please authenticate first to obtain a valid token.");
         }
 
         var tadoToken = new Token
@@ -152,12 +162,23 @@ public class TadoTemperatureController : ControllerBase
         };
         if (!_tadoService.Authenticate(tadoToken))
         {
-            return Unauthorized();
+            return Unauthorized("Failed to authenticate with Tado.");
         }
 
         var me = await _tadoService.GetMe();
-        var homeId = (int)me.Homes.Single().Id;
+
+        if (me == null || me.Homes == null || me.Homes.Length == 0)
+        {
+            return NotFound("No homes found for the authenticated user.");
+        }
+
+        var homeId = Convert.ToInt32(me.Homes.Single().Id??0);
         var zones = await _tadoService.GetZones(homeId);
+
+        if(zones == null || zones.Length == 0)
+        {
+            return NotFound("No zones found for the home.");
+        }
 
         var zoneName = string.Empty;
         var insiteTemperature = (double) 0;
@@ -166,12 +187,12 @@ public class TadoTemperatureController : ControllerBase
         foreach (var zone in zones)
         {
             zoneName = zone.Name;
-            var state = await _tadoService.GetZoneState(homeId, (short)zone.Id);
-            if (state != null && state.SensorDataPoints != null && state.SensorDataPoints.InsideTemperature != null)
+            var state = await _tadoService.GetZoneState(homeId, Convert.ToInt16(zone.Id));
+            if (state != null && state.SensorDataPoints != null && state.SensorDataPoints.InsideTemperature != null && state.SensorDataPoints.InsideTemperature.Celsius != null)
             {
                 insiteTemperature = state.SensorDataPoints.InsideTemperature.Celsius.Value;
             }
-            if (state != null && state.SensorDataPoints != null && state.SensorDataPoints.Humidity != null)
+            if (state != null && state.SensorDataPoints != null && state.SensorDataPoints.Humidity != null && state.SensorDataPoints.Humidity.Percentage != null)
             {
                 humidityPercentage = state.SensorDataPoints.Humidity.Percentage.Value;
             }
