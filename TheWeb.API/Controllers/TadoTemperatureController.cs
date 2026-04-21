@@ -90,7 +90,10 @@ public class TadoTemperatureController : ControllerBase
         _dbContext.TadoTokens.Add(newToken);
         await _dbContext.SaveChangesAsync();
 
-        _tadoService.Authenticate(tokenResponse);
+        if (!_tadoService.Authenticate(tokenResponse))
+        {
+            return Unauthorized();
+        }
         var me = await _tadoService.GetMe();
         var homeId = (int)me.Homes.Single().Id;
         var zones = await _tadoService.GetZones(homeId);
@@ -125,6 +128,100 @@ public class TadoTemperatureController : ControllerBase
             HumidityPercentage = humidityPercentage,
             TokenId = newToken.TokenId,
             ZoneName = $"{zoneName}",
+        }); // Returns a 200 OK status with the JSON object
+    }
+
+    [Route("addSchedule")] // This makes the URL: api/tadotemperature/addSchedule/{communicationId}
+    [HttpPost]
+    public async Task<ActionResult<CreatedTadoSchedule>> AddTrackingSchedule([FromBody] SetSchedule setSchedule)
+    {
+        var token = await _dbContext.TadoTokens.FirstOrDefaultAsync(t => t.TokenId == setSchedule.TokenId);
+        if (token == null)
+        {
+            return NotFound();
+        }
+
+        var tadoToken = new Token
+        {
+            AccessToken = token.AccessToken,
+            RefreshToken = token.RefreshToken,
+            ExpiresIn = token.ExpiresIn,
+            Scope = token.Scope,
+            TokenType = token.TokenType,
+            UserId = token.UserId
+        };
+        if (!_tadoService.Authenticate(tadoToken))
+        {
+            return Unauthorized();
+        }
+
+        var me = await _tadoService.GetMe();
+        var homeId = (int)me.Homes.Single().Id;
+        var zones = await _tadoService.GetZones(homeId);
+
+        var zoneName = string.Empty;
+        var insiteTemperature = (double) 0;
+        var humidityPercentage = (double) 0;
+
+        foreach (var zone in zones)
+        {
+            zoneName = zone.Name;
+            var state = await _tadoService.GetZoneState(homeId, (short)zone.Id);
+            if (state != null && state.SensorDataPoints != null && state.SensorDataPoints.InsideTemperature != null)
+            {
+                insiteTemperature = state.SensorDataPoints.InsideTemperature.Celsius.Value;
+            }
+            if (state != null && state.SensorDataPoints != null && state.SensorDataPoints.Humidity != null)
+            {
+                humidityPercentage = state.SensorDataPoints.Humidity.Percentage.Value;
+            }
+
+            if (insiteTemperature != 0 && humidityPercentage != 0)
+            {
+                break; // Exit the loop if we have valid temperature and humidity values
+            }
+        }
+
+        var newSchedule = new TadoRetrievalSchedule
+        {
+            TokenId = setSchedule.TokenId,
+            Interval = setSchedule.IntervalInMinutes,
+            NextRetrievalTime = DateTime.UtcNow.AddMinutes(setSchedule.IntervalInMinutes),
+            LastRetrievalTime = DateTime.UtcNow,
+            IsActive = true,
+            HomeId = homeId,
+            ZoneName = $"{zoneName}",
+            LastError = string.Empty,
+            ConsecutiveFailures = 0
+        };
+
+        _dbContext.TadoRetrievalSchedules.Add(newSchedule);
+        await _dbContext.SaveChangesAsync();
+
+        var newRetrievedData = new TadoRetrievedData
+        {
+            ScheduleId = newSchedule.ScheduleId,
+            HomeId = homeId,
+            ZoneName = $"{zoneName}",
+            InsideTemperatureCelsius = insiteTemperature,
+            HumidityPercentage = humidityPercentage,
+            RetrievedAt = DateTime.UtcNow
+        };
+
+        _dbContext.TadoRetrievedData.Add(newRetrievedData);
+        await _dbContext.SaveChangesAsync();
+
+        return Ok(new CreatedTadoSchedule
+        {
+            ScheduleId = newSchedule.ScheduleId,
+            HomeId = homeId,
+            InsideTemperatureCelsius = insiteTemperature,
+            HumidityPercentage = humidityPercentage,            
+            ZoneName = $"{zoneName}",
+            TokenId = newSchedule.TokenId,
+            Interval = newSchedule.Interval,
+            NextRetrievalTime = newSchedule.NextRetrievalTime,
+            LastRetrievalTime = newSchedule.LastRetrievalTime
         }); // Returns a 200 OK status with the JSON object
     }
 }

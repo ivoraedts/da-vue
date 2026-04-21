@@ -2,6 +2,7 @@
 import { ref, type Ref, onMounted, computed } from 'vue'
 import type { TadoInitialization } from '@/models/TadoInitialization';
 import type { ActualTadoData } from '@/models/ActualTadoData'
+import type { SetSchedule } from '@/models/SetSchedule';
 
 const stepperIsActive: Ref<boolean> = ref(false);
 const stepperIsDisabled: Ref<boolean> = ref(false);
@@ -20,7 +21,7 @@ function stopStepper() {
 const currentStep = ref(1);
 const handleNext = () => {
   if (currentStep.value === 3) {
-    alert("Form Submitted!");
+    addTrackingSchedule();
   } else {
     if (currentStep.value === 1) {
         fetchUrl();
@@ -68,6 +69,28 @@ async function authenticateCommunication()
   const min = ref(1)
   const max = ref(120)
   const slider = ref(60)
+
+  async function addTrackingSchedule() {
+    var newSchedule : SetSchedule = {
+        tokenId: ActualTadoData.value?.tokenId ?? 0,
+        intervalInMinutes: slider.value
+    }
+
+    const response = await fetch('/api/tadotemperature/addSchedule', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newSchedule)
+      })
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`)
+      }
+
+      alert("Tracking schedule added successfully! The backend will now track your Tado temperatures at the specified interval.");
+      stopStepper();
+  }
 
 </script>
 

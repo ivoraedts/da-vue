@@ -12,5 +12,3 @@ public class TadoToken
     public required string TokenType { get; set; }
     public required string UserId { get; set; }
 }
-
-
