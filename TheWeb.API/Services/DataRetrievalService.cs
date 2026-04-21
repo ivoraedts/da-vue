@@ -2,6 +2,7 @@ using KoenZomers.Tado.Api.Controllers;
 using KoenZomers.Tado.Api.Models.Authentication;
 using Microsoft.EntityFrameworkCore;
 using TheWeb.API.Data;
+using TheWeb.API.Exceptions;
 
 public interface IDataRetrievalService
 {
@@ -33,8 +34,7 @@ public class DataRetrievalService : IDataRetrievalService
 
             if (activeSchedule.NextRetrievalTime > DateTimeOffset.Now)
             {
-                _logger.LogInformation("Next retrieval time is in the future ({time}). Skipping data retrieval.", activeSchedule.NextRetrievalTime);
-                return activeSchedule.NextRetrievalTime;
+                throw new ToEarlyException(activeSchedule.NextRetrievalTime, $"Next retrieval time is in the future ({activeSchedule.NextRetrievalTime:O}). Skipping data retrieval.");
             }
 
             var token = await _dbContext.TadoTokens.FirstOrDefaultAsync(t => t.TokenId == activeSchedule.TokenId);

@@ -1,3 +1,5 @@
+using TheWeb.API.Exceptions;
+
 public class RunScheduledRetrievals : BackgroundService
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;
@@ -36,7 +38,7 @@ public class RunScheduledRetrievals : BackgroundService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred in the background service.");
+                _logger.LogError($"An error occurred in the background service: {ex}");
                 await Task.Delay(TimeSpan.FromSeconds(DelayInSeconds), stoppingToken);
             }
         }
@@ -53,6 +55,11 @@ public class RunScheduledRetrievals : BackgroundService
             {
                 var nextRetrievalTime = await dataRetrievalService.RetrieveDataAsync(stoppingToken);
                 return nextRetrievalTime;
+            }
+            catch (ToEarlyException ex)
+            {
+                _logger.LogInformation($"ToEarlyException occurred: {ex.Message}. Next retrieval time is at: {ex.NextRetrievalTime:O}, so waiting for {ex.NextRetrievalTime - DateTime.UtcNow}." );
+                return ex.NextRetrievalTime;
             }
             catch(Exception ex)
             {
