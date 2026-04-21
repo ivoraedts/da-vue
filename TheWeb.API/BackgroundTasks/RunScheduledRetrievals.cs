@@ -49,8 +49,16 @@ public class RunScheduledRetrievals : BackgroundService
         using (var scope = _serviceScopeFactory.CreateScope())
         {
             var dataRetrievalService = scope.ServiceProvider.GetRequiredService<IDataRetrievalService>();
-            var nextRetrievalTime = await dataRetrievalService.RetrieveDataAsync(stoppingToken);
-            return nextRetrievalTime;
+            try
+            {
+                var nextRetrievalTime = await dataRetrievalService.RetrieveDataAsync(stoppingToken);
+                return nextRetrievalTime;
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while retrieving data.");
+                return DateTime.UtcNow.AddMinutes(5); // In case something goes wrong, try again in 5 minutes
+            }
         }
     }
 }

@@ -24,15 +24,11 @@ public class DataRetrievalService : IDataRetrievalService
     public async Task<DateTime> RetrieveDataAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Starting data retrieval at: {time}", DateTimeOffset.Now);
-        var nextRetrievalTimeInCaseOfError = DateTime.UtcNow.AddMinutes(5); // In case something goes wrong
 
-        try
-        {
             var activeSchedule = await _dbContext.TadoRetrievalSchedules.Where(s => s.IsActive).FirstOrDefaultAsync();
             if (activeSchedule == null)
             {
-                _logger.LogInformation("No active retrieval schedule found. Skipping data retrieval.");
-                return nextRetrievalTimeInCaseOfError;
+                throw new Exception("No active retrieval schedule found.");
             }
 
             if (activeSchedule.NextRetrievalTime > DateTimeOffset.Now)
@@ -42,9 +38,9 @@ public class DataRetrievalService : IDataRetrievalService
             }
 
             var token = await _dbContext.TadoTokens.FirstOrDefaultAsync(t => t.TokenId == activeSchedule.TokenId);
-            if (token == null)            {
-                _logger.LogWarning("Token with ID {tokenId} not found. Skipping data retrieval.", activeSchedule.TokenId);
-                return nextRetrievalTimeInCaseOfError;
+            if (token == null)            
+            {
+                throw new Exception($"No token found for token ID {activeSchedule.TokenId}.");
             }
 
             var tadoToken = new Token
@@ -59,8 +55,7 @@ public class DataRetrievalService : IDataRetrievalService
 
             if (!_tadoService.Authenticate(tadoToken))
             {
-                _logger.LogWarning($"Something is wrong with the token related to token {activeSchedule.TokenId}. Even after expiring, this is not the point where things should go wrong. Skipping data retrieval.");
-                return nextRetrievalTimeInCaseOfError;
+                throw new Exception($"Something is wrong with the token related to token {activeSchedule.TokenId}. Even after expiring, this is not the point where things should go wrong. Skipping data retrieval.");
             }
 
         var me = await _tadoService.GetMe();
@@ -72,19 +67,16 @@ public class DataRetrievalService : IDataRetrievalService
 
             if (tadoToken == null)
             {
-                _logger.LogWarning("Failed to refresh token. Skipping data retrieval.");
-                return nextRetrievalTimeInCaseOfError;
+                throw new Exception("Failed to refresh token. Skipping data retrieval.");
             }
             if (!_tadoService.Authenticate(tadoToken))
             {
-                _logger.LogWarning("Despite the refresh token being obtained, failed to authenticate with Tado using token ID {tokenId}. Skipping data retrieval.", activeSchedule.TokenId);
-                return nextRetrievalTimeInCaseOfError;
+                throw new Exception($"Despite the refresh token being obtained, failed to authenticate with Tado using token ID {activeSchedule.TokenId}. Skipping data retrieval.");
             }
             me = await _tadoService.GetMe();
             if (me == null || me.Homes == null || me.Homes.Length == 0)
             {
-                _logger.LogWarning("Even after refreshing the token, no homes found for the authenticated user. Skipping data retrieval.");
-                return nextRetrievalTimeInCaseOfError;
+                throw new Exception("Even after refreshing the token, no homes found for the authenticated user. Skipping data retrieval.");
             }
 
             token.AccessToken = $"{tadoToken.AccessToken}";
@@ -102,8 +94,7 @@ public class DataRetrievalService : IDataRetrievalService
 
         if(zones == null || zones.Length == 0)
         {
-            _logger.LogWarning("No zones found for the home.");
-            return nextRetrievalTimeInCaseOfError;
+            throw new Exception("No zones found for the home.");
         }
 
         var zoneName = string.Empty;
@@ -155,11 +146,6 @@ public class DataRetrievalService : IDataRetrievalService
 
             _logger.LogInformation("Data retrieval completed successfully at: {time}", DateTimeOffset.Now);
             return activeSchedule.NextRetrievalTime;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "An error occurred during data retrieval.");
-            return nextRetrievalTimeInCaseOfError;
-        }
+        
     }
 }
