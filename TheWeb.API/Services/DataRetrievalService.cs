@@ -49,15 +49,24 @@ public class DataRetrievalService : IDataRetrievalService
         _logger.LogInformation("Starting data retrieval at: {time}", DateTimeOffset.Now);
 
         var schedule = await GetValidatedActiveSchedule();
-        var userInfo = await AuthenticateAndRetrieveUserInfo(schedule.TokenId, cancellationToken);
-        var retrievedData = await RetrieveBasicData(userInfo);
+        try
+        {
+            var userInfo = await AuthenticateAndRetrieveUserInfo(schedule.TokenId, cancellationToken);
+            var retrievedData = await RetrieveBasicData(userInfo);
 
-        await StoreRetrievedData(retrievedData, schedule.ScheduleId);
-        await UpdateRetrievalSchedule(schedule);
+            await StoreRetrievedData(retrievedData, schedule.ScheduleId);
+            await UpdateRetrievalSchedule(schedule);
 
-        _logger.LogInformation("Data retrieval completed successfully at: {time}", DateTimeOffset.Now);
-        return schedule.NextRetrievalTime;
+            _logger.LogInformation("Data retrieval completed successfully at: {time}", DateTimeOffset.Now);
+            return schedule.NextRetrievalTime;
+        }
+        catch (Exception ex)
+        {
+            await RegisterFailureInSchedule(schedule, ex);
+            throw; // Rethrow the exception to be handled in the calling method and to avoid updating the next retrieval time, since the retrieval was not successful.
+        }
     }
+
     private async Task<TadoRetrievalSchedule> GetValidatedActiveSchedule()
     {
         var activeSchedule = await _dbContext.TadoRetrievalSchedules.Where(s => s.IsActive).FirstOrDefaultAsync();
@@ -242,6 +251,19 @@ public class DataRetrievalService : IDataRetrievalService
         }
 
         schedule.LastRetrievalTime = DateTime.UtcNow;
+        schedule.ConsecutiveFailures = 0;
+        _dbContext.TadoRetrievalSchedules.Update(schedule);
+        await _dbContext.SaveChangesAsync();
+    }
+
+    private async Task RegisterFailureInSchedule(TadoRetrievalSchedule schedule, Exception ex)
+    {
+        schedule.ConsecutiveFailures += 1;
+        if (schedule.ConsecutiveFailures >= 5)
+        {
+            _logger.LogError(ex, $"Data retrieval failed {schedule.ConsecutiveFailures} times in a row for schedule ID {schedule.ScheduleId}. Deactivating the schedule to prevent further issues.");
+            schedule.IsActive = false;
+        }
         _dbContext.TadoRetrievalSchedules.Update(schedule);
         await _dbContext.SaveChangesAsync();
     }
