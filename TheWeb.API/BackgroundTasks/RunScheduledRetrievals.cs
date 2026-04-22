@@ -1,3 +1,7 @@
+using TheWeb.API.Services;
+
+namespace TheWeb.API.BackgroundTasks;
+
 public class RunScheduledRetrievals : BackgroundService
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;

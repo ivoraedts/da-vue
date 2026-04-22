@@ -1,7 +1,7 @@
 using KoenZomers.Tado.Api.Models.Authentication;
 using TheWeb.API.Data;
 
-namespace TheWebApi.Extensions
+namespace TheWeb.API.Extensions
 {
     public static class Converters
     {

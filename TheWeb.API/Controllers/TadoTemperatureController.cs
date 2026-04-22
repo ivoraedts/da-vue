@@ -3,9 +3,9 @@ using KoenZomers.Tado.Api.Models.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TheWeb.API.Data;
-using TheWebApi.Models;
+using TheWeb.API.Models;
 
-namespace TheWebApi.Controllers;
+namespace TheWeb.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")] // This makes the URL: api/tadotemperature
@@ -22,7 +22,7 @@ public class TadoTemperatureController : ControllerBase
 
     [Route("get-new-url")] // This makes the URL: api/tadotemperature/get-new-url
     [HttpGet]
-    public async Task<ActionResult<TheWebApi.Models.TadoInitialization>> Get()
+    public async Task<ActionResult<TheWeb.API.Models.TadoInitialization>> Get()
     {
 
         var deviceAuthorization = await _tadoService.GetDeviceCodeAuthentication(CancellationToken.None);
@@ -54,7 +54,7 @@ public class TadoTemperatureController : ControllerBase
 
     [Route("authenticate/{communicationId}")] // This makes the URL: api/tadotemperature/authenticate/{communicationId}
     [HttpGet]
-    public async Task<ActionResult<TheWebApi.Models.ActualTadoData>> GetByCommunicationId(int communicationId)
+    public async Task<ActionResult<TheWeb.API.Models.ActualTadoData>> GetByCommunicationId(int communicationId)
     {
         var storedDeviceAuthorization = await _dbContext.TadoDeviceAuthentications.FirstOrDefaultAsync(d => d.CommunicationId==communicationId);
         if (storedDeviceAuthorization == null)

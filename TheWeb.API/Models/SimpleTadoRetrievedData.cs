@@ -1,4 +1,4 @@
-namespace TheWebApi.Models
+namespace TheWeb.API.Models
 {
     public class SimpleTadoRetrievedData
     {

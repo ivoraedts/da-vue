@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using TheWebApi.Models;
+using TheWeb.API.Models;
 
-namespace TheWebApi.Controllers;
+namespace TheWeb.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")] // This makes the URL: api/displaylink

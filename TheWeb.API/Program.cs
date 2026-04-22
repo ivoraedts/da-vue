@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using TheWeb.API.Data;
+using TheWeb.API.Services;
+using TheWeb.API.BackgroundTasks;
 using KoenZomers.Tado.Api.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);

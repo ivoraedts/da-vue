@@ -3,8 +3,10 @@ using KoenZomers.Tado.Api.Models.Authentication;
 using Microsoft.EntityFrameworkCore;
 using TheWeb.API.Data;
 using TheWeb.API.Exceptions;
-using TheWebApi.Extensions;
-using TheWebApi.Models;
+using TheWeb.API.Extensions;
+using TheWeb.API.Models;
+
+namespace TheWeb.API.Services;
 
 public interface IDataRetrievalService
 {
