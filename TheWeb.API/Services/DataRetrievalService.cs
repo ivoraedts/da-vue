@@ -24,39 +24,57 @@ public class DataRetrievalService : IDataRetrievalService
 
     public async Task<DateTime> RetrieveDataAsync(CancellationToken cancellationToken)
     {
+        try
+        {
+            return await TryRetrieveDataOrThrowException(cancellationToken);
+        }
+        catch (ToEarlyException ex)
+        {
+            _logger.LogInformation($"ToEarlyException occurred: {ex.Message}. Next retrieval time is at: {ex.NextRetrievalTime:O}, so waiting for {ex.NextRetrievalTime - DateTime.UtcNow}.");
+            return ex.NextRetrievalTime;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while retrieving data.");
+            return DateTime.UtcNow.AddMinutes(5); // In case something goes wrong, try again in 5 minutes
+        }
+    }
+
+    private async Task<DateTime> TryRetrieveDataOrThrowException(CancellationToken cancellationToken)
+    {
         _logger.LogInformation("Starting data retrieval at: {time}", DateTimeOffset.Now);
 
-            var activeSchedule = await _dbContext.TadoRetrievalSchedules.Where(s => s.IsActive).FirstOrDefaultAsync();
-            if (activeSchedule == null)
-            {
-                throw new Exception("No active retrieval schedule found.");
-            }
+        var activeSchedule = await _dbContext.TadoRetrievalSchedules.Where(s => s.IsActive).FirstOrDefaultAsync();
+        if (activeSchedule == null)
+        {
+            throw new Exception("No active retrieval schedule found.");
+        }
 
-            if (activeSchedule.NextRetrievalTime > DateTimeOffset.Now)
-            {
-                throw new ToEarlyException(activeSchedule.NextRetrievalTime, $"Next retrieval time is in the future ({activeSchedule.NextRetrievalTime:O}). Skipping data retrieval.");
-            }
+        if (activeSchedule.NextRetrievalTime > DateTimeOffset.Now)
+        {
+            throw new ToEarlyException(activeSchedule.NextRetrievalTime, $"Next retrieval time is in the future ({activeSchedule.NextRetrievalTime:O}). Skipping data retrieval.");
+        }
 
-            var token = await _dbContext.TadoTokens.FirstOrDefaultAsync(t => t.TokenId == activeSchedule.TokenId);
-            if (token == null)            
-            {
-                throw new Exception($"No token found for token ID {activeSchedule.TokenId}.");
-            }
+        var token = await _dbContext.TadoTokens.FirstOrDefaultAsync(t => t.TokenId == activeSchedule.TokenId);
+        if (token == null)
+        {
+            throw new Exception($"No token found for token ID {activeSchedule.TokenId}.");
+        }
 
-            var tadoToken = new Token
-            {
-                AccessToken = token.AccessToken,
-                RefreshToken = token.RefreshToken,
-                ExpiresIn = token.ExpiresIn,
-                Scope = token.Scope,
-                TokenType = token.TokenType,
-                UserId = token.UserId
-            };
+        var tadoToken = new Token
+        {
+            AccessToken = token.AccessToken,
+            RefreshToken = token.RefreshToken,
+            ExpiresIn = token.ExpiresIn,
+            Scope = token.Scope,
+            TokenType = token.TokenType,
+            UserId = token.UserId
+        };
 
-            if (!_tadoService.Authenticate(tadoToken))
-            {
-                throw new Exception($"Something is wrong with the token related to token {activeSchedule.TokenId}. Even after expiring, this is not the point where things should go wrong. Skipping data retrieval.");
-            }
+        if (!_tadoService.Authenticate(tadoToken))
+        {
+            throw new Exception($"Something is wrong with the token related to token {activeSchedule.TokenId}. Even after expiring, this is not the point where things should go wrong. Skipping data retrieval.");
+        }
 
         var me = await _tadoService.GetMe();
 
@@ -81,7 +99,7 @@ public class DataRetrievalService : IDataRetrievalService
 
             token.AccessToken = $"{tadoToken.AccessToken}";
             token.RefreshToken = $"{tadoToken.RefreshToken}";
-            token.ExpiresIn = tadoToken.ExpiresIn??0;
+            token.ExpiresIn = tadoToken.ExpiresIn ?? 0;
             token.Scope = $"{tadoToken.Scope}";
             token.TokenType = $"{tadoToken.TokenType}";
             token.UserId = $"{tadoToken.UserId}";
@@ -89,17 +107,17 @@ public class DataRetrievalService : IDataRetrievalService
             await _dbContext.SaveChangesAsync();
         }
 
-        var homeId = Convert.ToInt32(me.Homes.Single().Id??0);
+        var homeId = Convert.ToInt32(me.Homes.Single().Id ?? 0);
         var zones = await _tadoService.GetZones(homeId);
 
-        if(zones == null || zones.Length == 0)
+        if (zones == null || zones.Length == 0)
         {
             throw new Exception("No zones found for the home.");
         }
 
         var zoneName = string.Empty;
-        var insiteTemperature = (double) 0;
-        var humidityPercentage = (double) 0;
+        var insiteTemperature = (double)0;
+        var humidityPercentage = (double)0;
 
         foreach (var zone in zones)
         {
@@ -144,8 +162,7 @@ public class DataRetrievalService : IDataRetrievalService
         _dbContext.TadoRetrievalSchedules.Update(activeSchedule);
         await _dbContext.SaveChangesAsync();
 
-            _logger.LogInformation("Data retrieval completed successfully at: {time}", DateTimeOffset.Now);
-            return activeSchedule.NextRetrievalTime;
-        
+        _logger.LogInformation("Data retrieval completed successfully at: {time}", DateTimeOffset.Now);
+        return activeSchedule.NextRetrievalTime;
     }
 }

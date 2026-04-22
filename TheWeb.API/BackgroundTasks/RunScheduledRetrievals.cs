@@ -1,10 +1,9 @@
-using TheWeb.API.Exceptions;
-
 public class RunScheduledRetrievals : BackgroundService
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly ILogger<RunScheduledRetrievals> _logger;
     const int DelayInSeconds = 5;
+    const int AfterErrorDelayInSeconds = 60;
 
     public RunScheduledRetrievals(IServiceScopeFactory serviceScopeFactory, ILogger<RunScheduledRetrievals> logger)
     {
@@ -23,12 +22,12 @@ public class RunScheduledRetrievals : BackgroundService
         {
             _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
 
-            try 
+            try
             {
                 // Perform your background task here
                 var nextRetrievalTime = await DoWorkAsync(stoppingToken);
 
-                _logger.LogInformation($"Next retrieval time is at: {nextRetrievalTime:O}, so waiting for {nextRetrievalTime - DateTime.UtcNow}." );
+                _logger.LogInformation($"Next retrieval time is at: {nextRetrievalTime:O}, so waiting for {nextRetrievalTime - DateTime.UtcNow}.");
                 await Task.Delay(nextRetrievalTime - DateTime.UtcNow, stoppingToken);
             }
             catch (OperationCanceledException)
@@ -38,8 +37,8 @@ public class RunScheduledRetrievals : BackgroundService
             }
             catch (Exception ex)
             {
-                _logger.LogError($"An error occurred in the background service: {ex}");
-                await Task.Delay(TimeSpan.FromSeconds(DelayInSeconds), stoppingToken);
+                _logger.LogError($"An unexpected error occurred in the background service: {ex}");
+                await Task.Delay(TimeSpan.FromSeconds(AfterErrorDelayInSeconds), stoppingToken);
             }
         }
 
@@ -51,21 +50,9 @@ public class RunScheduledRetrievals : BackgroundService
         using (var scope = _serviceScopeFactory.CreateScope())
         {
             var dataRetrievalService = scope.ServiceProvider.GetRequiredService<IDataRetrievalService>();
-            try
-            {
-                var nextRetrievalTime = await dataRetrievalService.RetrieveDataAsync(stoppingToken);
-                return nextRetrievalTime;
-            }
-            catch (ToEarlyException ex)
-            {
-                _logger.LogInformation($"ToEarlyException occurred: {ex.Message}. Next retrieval time is at: {ex.NextRetrievalTime:O}, so waiting for {ex.NextRetrievalTime - DateTime.UtcNow}." );
-                return ex.NextRetrievalTime;
-            }
-            catch(Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while retrieving data.");
-                return DateTime.UtcNow.AddMinutes(5); // In case something goes wrong, try again in 5 minutes
-            }
+
+            var nextRetrievalTime = await dataRetrievalService.RetrieveDataAsync(stoppingToken);
+            return nextRetrievalTime;
         }
     }
 }
