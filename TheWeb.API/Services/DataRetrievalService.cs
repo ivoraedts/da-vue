@@ -3,6 +3,8 @@ using KoenZomers.Tado.Api.Models.Authentication;
 using Microsoft.EntityFrameworkCore;
 using TheWeb.API.Data;
 using TheWeb.API.Exceptions;
+using TheWebApi.Extensions;
+using TheWebApi.Models;
 
 public interface IDataRetrievalService
 {
@@ -44,6 +46,18 @@ public class DataRetrievalService : IDataRetrievalService
     {
         _logger.LogInformation("Starting data retrieval at: {time}", DateTimeOffset.Now);
 
+        var schedule = await GetValidatedActiveSchedule();
+        var userInfo = await AuthenticateAndRetrieveUserInfo(schedule.TokenId, cancellationToken);
+        var retrievedData = await RetrieveBasicData(userInfo);
+
+        await StoreRetrievedData(retrievedData, schedule.ScheduleId);
+        await UpdateRetrievalSchedule(schedule);
+
+        _logger.LogInformation("Data retrieval completed successfully at: {time}", DateTimeOffset.Now);
+        return schedule.NextRetrievalTime;
+    }
+    private async Task<TadoRetrievalSchedule> GetValidatedActiveSchedule()
+    {
         var activeSchedule = await _dbContext.TadoRetrievalSchedules.Where(s => s.IsActive).FirstOrDefaultAsync();
         if (activeSchedule == null)
         {
@@ -54,115 +68,179 @@ public class DataRetrievalService : IDataRetrievalService
         {
             throw new ToEarlyException(activeSchedule.NextRetrievalTime, $"Next retrieval time is in the future ({activeSchedule.NextRetrievalTime:O}). Skipping data retrieval.");
         }
+        return activeSchedule;
+    }
 
-        var token = await _dbContext.TadoTokens.FirstOrDefaultAsync(t => t.TokenId == activeSchedule.TokenId);
+    private async Task<KoenZomers.Tado.Api.Models.User> AuthenticateAndRetrieveUserInfo(int tokenId, CancellationToken cancellationToken)
+    {
+        var token = await GetTokenFromDatabase(tokenId);
+        var tadoToken = GetAuthenticatedToken(tokenId, token);
+        return await GetUserInfo(tokenId, token, tadoToken, cancellationToken);
+    }
+
+    private async Task<TadoToken> GetTokenFromDatabase(int tokenId)
+    {
+        var token = await _dbContext.TadoTokens.FirstOrDefaultAsync(t => t.TokenId == tokenId);
         if (token == null)
         {
-            throw new Exception($"No token found for token ID {activeSchedule.TokenId}.");
+            throw new Exception($"No token found for token ID {tokenId}.");
         }
+        return token;
+    }
 
-        var tadoToken = new Token
-        {
-            AccessToken = token.AccessToken,
-            RefreshToken = token.RefreshToken,
-            ExpiresIn = token.ExpiresIn,
-            Scope = token.Scope,
-            TokenType = token.TokenType,
-            UserId = token.UserId
-        };
+    private Token GetAuthenticatedToken(int tokenId, TadoToken token)
+    {
+        var tadoToken = token.ConvertToTadoToken();
+        AuthenticateToken(tokenId, tadoToken);
+        return tadoToken;
+    }
 
+    private void AuthenticateToken(int tokenId, Token tadoToken)
+    {
         if (!_tadoService.Authenticate(tadoToken))
         {
-            throw new Exception($"Something is wrong with the token related to token {activeSchedule.TokenId}. Even after expiring, this is not the point where things should go wrong. Skipping data retrieval.");
+            throw new Exception($"Something is wrong with the token related to token {tokenId}. Even after expiring, this is not the point where things should go wrong. Skipping data retrieval.");
         }
+    }
 
-        var me = await _tadoService.GetMe();
+    private async Task<KoenZomers.Tado.Api.Models.User> GetUserInfo(int tokenId, TadoToken token, Token tadoToken, CancellationToken cancellationToken)
+    {
+        var userInfo = await _tadoService.GetMe();
 
-        if (me == null || me.Homes == null || me.Homes.Length == 0)
+        if (userInfo == null || userInfo.Homes == null || userInfo.Homes.Length == 0)
         {
-            _logger.LogWarning($"Token is expired and needs a refresh. Attempting to refresh the token for token ID {activeSchedule.TokenId}.");
-            tadoToken = await _tadoService.GetAccessTokenWithRefreshToken(tadoToken.RefreshToken, cancellationToken);
-
-            if (tadoToken == null)
-            {
-                throw new Exception("Failed to refresh token. Skipping data retrieval.");
-            }
-            if (!_tadoService.Authenticate(tadoToken))
-            {
-                throw new Exception($"Despite the refresh token being obtained, failed to authenticate with Tado using token ID {activeSchedule.TokenId}. Skipping data retrieval.");
-            }
-            me = await _tadoService.GetMe();
-            if (me == null || me.Homes == null || me.Homes.Length == 0)
-            {
-                throw new Exception("Even after refreshing the token, no homes found for the authenticated user. Skipping data retrieval.");
-            }
-
-            token.AccessToken = $"{tadoToken.AccessToken}";
-            token.RefreshToken = $"{tadoToken.RefreshToken}";
-            token.ExpiresIn = tadoToken.ExpiresIn ?? 0;
-            token.Scope = $"{tadoToken.Scope}";
-            token.TokenType = $"{tadoToken.TokenType}";
-            token.UserId = $"{tadoToken.UserId}";
-            _dbContext.TadoTokens.Update(token);
-            await _dbContext.SaveChangesAsync();
+            return await RefreshTokenAndGetUserInfo(tokenId, token, tadoToken, cancellationToken);
         }
 
-        var homeId = Convert.ToInt32(me.Homes.Single().Id ?? 0);
-        var zones = await _tadoService.GetZones(homeId);
+        return userInfo;
+    }
 
-        if (zones == null || zones.Length == 0)
+    private async Task<KoenZomers.Tado.Api.Models.User> RefreshTokenAndGetUserInfo(int tokenId, TadoToken token, Token tadoToken, CancellationToken cancellationToken)
+    {
+        _logger.LogWarning($"Token is expired and needs a refresh. Attempting to refresh the token for token ID {tokenId}.");
+        tadoToken = await RefreshTokenAndAuthenticateIt(tokenId, $"{tadoToken.RefreshToken}", cancellationToken);
+        var userInfo = await _tadoService.GetMe();
+        if (userInfo == null || userInfo.Homes == null || userInfo.Homes.Length == 0)
         {
-            throw new Exception("No zones found for the home.");
+            throw new Exception("Even after refreshing the token, no homes found for the authenticated user. Skipping data retrieval.");
         }
 
-        var zoneName = string.Empty;
-        var insiteTemperature = (double)0;
-        var humidityPercentage = (double)0;
+        await StoreRefreshedToken(token, tadoToken);
+        return userInfo;
+    }
+
+    private async Task<Token> RefreshTokenAndAuthenticateIt(int tokenId, string refreshToken, CancellationToken cancellationToken)
+    {
+        var tadoToken = await _tadoService.GetAccessTokenWithRefreshToken(refreshToken, cancellationToken);
+
+        if (tadoToken == null)
+        {
+            throw new Exception("Failed to refresh token. Skipping data retrieval.");
+        }
+        if (!_tadoService.Authenticate(tadoToken))
+        {
+            throw new Exception($"Despite the refresh token being obtained, failed to authenticate with Tado using token ID {tokenId}. Skipping data retrieval.");
+        }
+
+        return tadoToken;
+    }
+
+    private async Task StoreRefreshedToken(TadoToken token, Token tadoToken)
+    {
+        token.AccessToken = $"{tadoToken.AccessToken}";
+        token.RefreshToken = $"{tadoToken.RefreshToken}";
+        token.ExpiresIn = tadoToken.ExpiresIn ?? 0;
+        token.Scope = $"{tadoToken.Scope}";
+        token.TokenType = $"{tadoToken.TokenType}";
+        token.UserId = $"{tadoToken.UserId}";
+        _dbContext.TadoTokens.Update(token);
+        await _dbContext.SaveChangesAsync();
+    }
+
+    private async Task<SimpleTadoRetrievedData> RetrieveBasicData(KoenZomers.Tado.Api.Models.User userInfo)
+    {
+        int homeId = GetHomeId(userInfo);
+        var zones = await GetZones(homeId);
+        var result = new SimpleTadoRetrievedData
+        {
+            HomeId = homeId,
+            ZoneName = string.Empty,
+            InsideTemperatureCelsius = (double)0,
+            HumidityPercentage = (double)0
+        };
 
         foreach (var zone in zones)
         {
-            zoneName = zone.Name;
+            result.ZoneName = $"{zone.Name}";
             var state = await _tadoService.GetZoneState(homeId, Convert.ToInt16(zone.Id));
             if (state != null && state.SensorDataPoints != null && state.SensorDataPoints.InsideTemperature != null && state.SensorDataPoints.InsideTemperature.Celsius != null)
             {
-                insiteTemperature = state.SensorDataPoints.InsideTemperature.Celsius.Value;
+                result.InsideTemperatureCelsius = state.SensorDataPoints.InsideTemperature.Celsius.Value;
             }
             if (state != null && state.SensorDataPoints != null && state.SensorDataPoints.Humidity != null && state.SensorDataPoints.Humidity.Percentage != null)
             {
-                humidityPercentage = state.SensorDataPoints.Humidity.Percentage.Value;
+                result.HumidityPercentage = state.SensorDataPoints.Humidity.Percentage.Value;
             }
 
-            if (insiteTemperature != 0 && humidityPercentage != 0)
+            if (result.InsideTemperatureCelsius != 0 && result.HumidityPercentage != 0)
             {
                 break; // Exit the loop if we have valid temperature and humidity values
             }
         }
+        return result;
+    }
 
+    private static int GetHomeId(KoenZomers.Tado.Api.Models.User userInfo)
+    {
+        if (userInfo.Homes == null || userInfo.Homes.Length == 0)
+        {
+            throw new Exception("No homes found for the authenticated user. Skipping data retrieval.");
+        }
+
+        if (userInfo.Homes.Length > 1)
+        {
+            throw new Exception("Multiple homes found for the authenticated user. This is currently not supported, so skipping data retrieval.");
+        }
+        return Convert.ToInt32(userInfo.Homes.Single().Id ?? 0);
+    }
+
+    private async Task<KoenZomers.Tado.Api.Models.Zone[]> GetZones(int homeId)
+    {
+        var zones = await _tadoService.GetZones(homeId);
+        if (zones == null || zones.Length == 0)
+        {
+            throw new Exception("No zones found for the home.");
+        }
+        return zones;
+    }
+
+    private async Task StoreRetrievedData(SimpleTadoRetrievedData retrievedData, int scheduleId)
+    {
         var newRetrievedData = new TadoRetrievedData
         {
-            ScheduleId = activeSchedule.ScheduleId,
-            HomeId = homeId,
-            ZoneName = $"{zoneName}",
-            InsideTemperatureCelsius = insiteTemperature,
-            HumidityPercentage = humidityPercentage,
+            ScheduleId = scheduleId,
+            HomeId = retrievedData.HomeId,
+            ZoneName = retrievedData.ZoneName,
+            InsideTemperatureCelsius = retrievedData.InsideTemperatureCelsius,
+            HumidityPercentage = retrievedData.HumidityPercentage,
             RetrievedAt = DateTime.UtcNow
         };
 
         _dbContext.TadoRetrievedData.Add(newRetrievedData);
         await _dbContext.SaveChangesAsync();
+    }
 
-        activeSchedule.NextRetrievalTime = activeSchedule.NextRetrievalTime.AddMinutes(activeSchedule.Interval);
-        if (activeSchedule.NextRetrievalTime < DateTime.UtcNow)
+    private async Task UpdateRetrievalSchedule(TadoRetrievalSchedule schedule)
+    {
+        schedule.NextRetrievalTime = schedule.NextRetrievalTime.AddMinutes(schedule.Interval);
+        if (schedule.NextRetrievalTime < DateTime.UtcNow)
         {
             //for some reason it was really late, so the calculated next retrieval time is already in the past. To avoid multiple quick retrievals, we set the next retrieval time to now + interval.
-            activeSchedule.NextRetrievalTime = DateTime.UtcNow.AddMinutes(activeSchedule.Interval);
+            schedule.NextRetrievalTime = DateTime.UtcNow.AddMinutes(schedule.Interval);
         }
 
-        activeSchedule.LastRetrievalTime = DateTime.UtcNow;
-        _dbContext.TadoRetrievalSchedules.Update(activeSchedule);
+        schedule.LastRetrievalTime = DateTime.UtcNow;
+        _dbContext.TadoRetrievalSchedules.Update(schedule);
         await _dbContext.SaveChangesAsync();
-
-        _logger.LogInformation("Data retrieval completed successfully at: {time}", DateTimeOffset.Now);
-        return activeSchedule.NextRetrievalTime;
     }
 }
