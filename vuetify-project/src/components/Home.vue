@@ -90,7 +90,7 @@ onMounted(() => {
                         <p>Schedule ID: {{ activeSchedule?.scheduleId }}</p>
                         <p>Interval: {{ activeSchedule?.interval }} minutes</p>
                         <p>Zone name: {{ activeSchedule?.zoneName }}</p>
-                        <p>consecutiveFailures: {{ activeSchedule?.consecutiveFailures }}</p>
+                        <p>Fail streak: {{ activeSchedule?.consecutiveFailures }}</p>
                     </v-col>
                     <v-col cols="6">
                         <p>Next Retrieval:</p>
