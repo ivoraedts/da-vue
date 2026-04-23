@@ -3,6 +3,7 @@ using KoenZomers.Tado.Api.Models.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TheWeb.API.Data;
+using TheWeb.API.Extensions;
 using TheWeb.API.Models;
 
 namespace TheWeb.API.Controllers;
@@ -245,4 +246,18 @@ public class TadoTemperatureController : ControllerBase
             LastRetrievalTime = newSchedule.LastRetrievalTime
         }); // Returns a 200 OK status with the JSON object
     }
+
+    [Route("getActiveSchedule")] // This makes the URL: api/tadotemperature/getActiveSchedule
+    [HttpGet]
+    public async Task<ActionResult<TadoRetrievalScheduleModel>> GetActiveSchedule()
+    {
+        var activeSchedule = await _dbContext.TadoRetrievalSchedules.OrderBy(s => s.ScheduleId).FirstOrDefaultAsync(s => s.IsActive);
+        if (activeSchedule == null)
+        {
+            return NotFound("No active schedule found.");
+        }
+
+        return Ok(activeSchedule.ConvertToModel());
+    }
+
 }

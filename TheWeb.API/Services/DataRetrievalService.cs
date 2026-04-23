@@ -69,7 +69,7 @@ public class DataRetrievalService : IDataRetrievalService
 
     private async Task<TadoRetrievalSchedule> GetValidatedActiveSchedule()
     {
-        var activeSchedule = await _dbContext.TadoRetrievalSchedules.Where(s => s.IsActive).FirstOrDefaultAsync();
+        var activeSchedule = await _dbContext.TadoRetrievalSchedules.Where(s => s.IsActive).OrderBy(s => s.ScheduleId).FirstOrDefaultAsync();
         if (activeSchedule == null)
         {
             throw new Exception("No active retrieval schedule found.");
@@ -261,8 +261,9 @@ public class DataRetrievalService : IDataRetrievalService
         schedule.ConsecutiveFailures += 1;
         if (schedule.ConsecutiveFailures >= 5)
         {
+            schedule.LastError = ex.Message;
             _logger.LogError(ex, $"Data retrieval failed {schedule.ConsecutiveFailures} times in a row for schedule ID {schedule.ScheduleId}. Deactivating the schedule to prevent further issues.");
-            schedule.IsActive = false;
+            schedule.IsActive = false;            
         }
         _dbContext.TadoRetrievalSchedules.Update(schedule);
         await _dbContext.SaveChangesAsync();

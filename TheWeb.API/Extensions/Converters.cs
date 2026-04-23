@@ -1,5 +1,6 @@
 using KoenZomers.Tado.Api.Models.Authentication;
 using TheWeb.API.Data;
+using TheWeb.API.Models;
 
 namespace TheWeb.API.Extensions
 {
@@ -15,6 +16,23 @@ namespace TheWeb.API.Extensions
                 Scope = token.Scope,
                 TokenType = token.TokenType,
                 UserId = token.UserId
+            };
+        }
+
+        public static TadoRetrievalScheduleModel ConvertToModel(this TadoRetrievalSchedule schedule)
+        {
+            return new TadoRetrievalScheduleModel
+            {
+                ScheduleId = schedule.ScheduleId,
+                TokenId = schedule.TokenId,
+                Interval = schedule.Interval,
+                NextRetrievalTime = schedule.NextRetrievalTime,
+                LastRetrievalTime = schedule.LastRetrievalTime,
+                IsActive = schedule.IsActive,
+                HomeId = schedule.HomeId,
+                ZoneName = schedule.ZoneName,
+                LastError = schedule.LastError,
+                ConsecutiveFailures = schedule.ConsecutiveFailures
             };
         }
 

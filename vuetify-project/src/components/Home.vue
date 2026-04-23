@@ -1,20 +1,44 @@
 <script setup lang="ts">
 import { ref, type Ref, onMounted, computed } from 'vue'
 import InitializeTracking from '@/components/InitializeTracking.vue'
+import type { TadoRetrievalScheduleModel } from '@/models/TadoRetrievalScheduleModel';
 
-const stepperIsActive: Ref<boolean> = ref(false);
-const stepperIsDisabled: Ref<boolean> = ref(false);
-
-const canStartStepper = computed(() => !stepperIsActive.value && !stepperIsDisabled.value);
-const canStopStepper = computed(() => stepperIsActive.value);
-
-function startStepper2() {
-  stepperIsActive.value = true;
+async function getActiveTrackingSchedule()
+{
+    // Vite proxies '/api/tadotemperature/getActiveSchedule' to 'http://localhost:5160/api/tadotemperature/getActiveSchedule'
+    const response = await fetch('/api/tadotemperature/getActiveSchedule')
+    
+    if (!response.ok) {
+      console.log("No active schedule");
+      activeScheduleExists.value = false;
+    }
+    else {
+      const data = await response.json() as TadoRetrievalScheduleModel;
+      if (data!==null) {
+          console.log("Active Schedule: " + data.scheduleId);
+          activeScheduleExists.value = true;
+          activeSchedule.value = data;
+      } else {
+          console.log("No active schedule");
+          activeScheduleExists.value = false;
+      }
+    }
+    activeSchedulesAreRetrieved.value = true;
 }
 
-function stopStepper2() {
-  stepperIsActive.value = false;
-}
+const activeSchedulesAreRetrieved: Ref<boolean> = ref(false);
+const activeScheduleExists: Ref<boolean> = ref(false);
+
+const canInitializeTracking = computed(() => activeSchedulesAreRetrieved.value && !activeScheduleExists.value);
+const canEditActiveSchedule = computed(() => activeSchedulesAreRetrieved.value && activeScheduleExists.value);
+
+const activeSchedule: Ref<TadoRetrievalScheduleModel | null> = ref(null);
+
+
+onMounted(() => {
+  getActiveTrackingSchedule();
+});
+
 </script>
 
 <template>    
@@ -26,25 +50,35 @@ function stopStepper2() {
                 </v-col>
             </v-row>
 
-            <div v-if="canStartStepper">
+            <div v-if="canInitializeTracking">
                 <InitializeTracking />
             </div>
 
-            <v-row v-if="canStartStepper" class="px-4 py-2" align="center">
-                <v-col cols="12" class="text-center">
-                    <v-btn color="primary" @click="startStepper2">
-                        Duh
-                    </v-btn>
-                </v-col>
-            </v-row>
+            <div v-if="canEditActiveSchedule">
+                <v-row class="px-4 py-2" align="center">
+                    <v-col cols="12" class="text-center">
+                        <h2>Active Schedule</h2>
+                    </v-col>
+                    <v-col cols="12" class="text-center">
+                        <p>Schedule ID: {{ activeSchedule?.scheduleId }}</p>
+                        <p>Interval: {{ activeSchedule?.interval }} minutes</p>
+                        <p>Next Retrieval: {{ activeSchedule?.nextRetrievalTime }}</p>
+                        <p>Last Retrieval: {{ activeSchedule?.lastRetrievalTime }}</p>
+                        <p>Zone name: {{ activeSchedule?.zoneName }}</p>
+                        <p>consecutiveFailures: {{ activeSchedule?.consecutiveFailures }}</p>
+                        <p>Last Error: {{ activeSchedule?.lastError }}</p>
+                    </v-col>
+                </v-row>
+                <v-row class="px-4 py-2" align="center">
+                    <v-col cols="12" class="text-center">
+                        <h2>Edit Active Schedule</h2>
+                    </v-col>
+                    <v-col cols="12" class="text-center">
+                        <p>Editing functionality not implemented yet.</p>
+                    </v-col>
+                </v-row>
+            </div>
 
-            <v-row v-if="canStopStepper" class="px-4 py-2" align="center">
-                <v-col cols="12" class="text-center">
-                    <v-btn color="error" @click="stopStepper2">
-                        daa
-                    </v-btn>
-                </v-col>
-            </v-row>
         </v-card>
     </v-container>
 </template>
