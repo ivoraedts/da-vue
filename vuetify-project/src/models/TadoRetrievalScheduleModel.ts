@@ -3,7 +3,9 @@ export interface TadoRetrievalScheduleModel {
     tokenId: number
     interval: number
     nextRetrievalTime: Date
+    nextRetrievalTimeString: string
     lastRetrievalTime: Date
+    lastRetrievalTimeString: string
     isActive: boolean
     homeId: number
     zoneName: string
