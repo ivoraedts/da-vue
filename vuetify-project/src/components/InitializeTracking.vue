@@ -106,7 +106,7 @@ async function authenticateCommunication()
             <v-row v-if="canStartStepper" class="px-4 py-2" align="center">
                 <v-col cols="12" class="text-center">
                     <v-btn color="primary" @click="startStepper">
-                        Initialise Tado Temperature Tracking
+                        Initialize Tado Temperature Tracking
                     </v-btn>
                 </v-col>
             </v-row>
