@@ -95,13 +95,7 @@ async function authenticateCommunication()
 </script>
 
 <template>    
-      <v-container>
-        <v-card class="mx-auto mt-5" max-width="500">
-            <v-row>
-                <v-col cols="12" class="text-center">
-                    <h1>Da Home Page</h1>
-                </v-col>
-            </v-row>
+
 
             <v-row v-if="canStartStepper" class="px-4 py-2" align="center">
                 <v-col cols="12" class="text-center">
@@ -205,6 +199,5 @@ async function authenticateCommunication()
                     </v-stepper>
                 </v-col>
             </v-row>
-        </v-card>
-    </v-container>
+
 </template>

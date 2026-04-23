@@ -2,7 +2,7 @@
   import About from '@/components/About.vue'
   import Links from '@/components/Links.vue'
   import Todo from '@/components/Todo.vue'
-  import InitializeTracking from '@/components/InitializeTracking.vue'
+  import Home from '@/components/Home.vue'
   import { ref, type Ref  } from 'vue'
 
   const showPage: Ref<string, string> = ref("home");
@@ -48,7 +48,7 @@
         <About />  
       </div>
       <div v-else-if="showPage==='home'">
-        <InitializeTracking />
+        <Home />
       </div>
       <div v-else-if="showPage==='links page'">
         <Links />
