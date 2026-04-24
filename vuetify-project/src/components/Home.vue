@@ -2,6 +2,7 @@
 import { ref, type Ref, onMounted, computed } from 'vue'
 import InitializeTracking from '@/components/InitializeTracking.vue'
 import ScheduleEditor from '@/components/sections/ScheduleEditor.vue'
+import DataExplorer from '@/components/sections/DataExplorer.vue'
 import type { TadoRetrievalScheduleModel } from '@/models/TadoRetrievalScheduleModel';
 import type { LatestMeasurement } from '@/models/LatestMeasurement';
 
@@ -138,22 +139,26 @@ onMounted(() => {
             <v-row class="px-4 py-2" align="center">
                 <v-col cols="12" class="text-center">
                     <span class="text-headline-small">Latest Measurement</span>
-                    
-                </v-col>
-                <v-col cols="6" class="d-flex align-center justify-center">
-                        <v-icon size="x-large" icon="mdi-thermometer"></v-icon>
-<span class="text-display-small">{{ latestMeasurement?.insideTemperatureCelsius }}</span>
-                         
 
-                         <v-icon size="x-large" icon="mdi-temperature-celsius"></v-icon>
                 </v-col>
-                <v-col cols="6" class="d-flex align-center justify-center">
+                <v-col cols="5" class="d-flex align-center justify-center">
+                    <v-icon size="x-large" icon="mdi-thermometer"></v-icon>
+                    <span class="text-display-small">{{ latestMeasurement?.insideTemperatureCelsius }}</span>
+                    <v-icon size="x-large" icon="mdi-temperature-celsius"></v-icon>
+                </v-col>
+                <v-col cols="5" class="d-flex align-center justify-center">
                     <v-icon size="x-large" icon="mdi-water"></v-icon>
-                     <span class="text-display-small">{{ latestMeasurement?.humidityPercentage }}</span>
+                    <span class="text-display-small">{{ latestMeasurement?.humidityPercentage }}</span>
                     <v-icon size="x-large" icon="mdi-percent"></v-icon>
                 </v-col>
+                <v-col cols="2" class="text-left">
+                    <v-btn icon @click="showDataExplorer()">
+                        <v-icon>mdi-chart-line</v-icon>
+                    </v-btn>
+                </v-col>
                 <v-col cols="12" class="text-center">
-                    <span class="text-body-small">Retrieved At: {{ new Date(latestMeasurement?.retrievedAt ?? "").toLocaleString() }}</span>                    
+                    <span class="text-body-small">Retrieved At: {{ new Date(latestMeasurement?.retrievedAt ??
+                        "").toLocaleString() }}</span>
                 </v-col>
             </v-row>
         </v-card>
@@ -193,5 +198,8 @@ onMounted(() => {
     </v-container>
     <div v-if="showSection === 'schedule editor'">
         <ScheduleEditor @response="(msg) => showOverviewWithComment(msg.action)" />
+    </div>
+    <div v-if="showSection === 'data explorer'">
+        <DataExplorer @response="(msg) => showOverviewWithComment(msg.action)" />
     </div>
 </template>
