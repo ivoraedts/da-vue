@@ -24,8 +24,8 @@ async function getActiveTrackingSchedule() {
             console.log("No active schedule");
             activeScheduleExists.value = false;
         }
+        activeSchedulesAreRetrieved.value = true;
     }
-    activeSchedulesAreRetrieved.value = true;
 }
 
 async function getLatestMeasurement() {
@@ -81,6 +81,23 @@ onMounted(() => {
                 <InitializeTracking />
             </div>
 
+            <div v-if="showLatestMeasurement">
+                <v-row class="px-4 py-2" align="center">
+                    <v-col cols="12" class="text-center">
+                        <h2>Latest Measurement</h2>
+                    </v-col>
+                    <v-col cols="6">
+                        <p>Inside Temperature: {{ latestMeasurement?.insideTemperatureCelsius }} °C</p>
+                    </v-col>
+                    <v-col cols="6">
+                        <p>Humidity: {{ latestMeasurement?.humidityPercentage }} %</p>
+                    </v-col>
+                    <v-col cols="12" class="text-center">
+                        <p>Retrieved At: {{ new Date(latestMeasurement?.retrievedAt ?? "").toLocaleString() }}</p>
+                    </v-col>
+                </v-row>
+            </div>
+
             <div v-if="canEditActiveSchedule">
                 <v-row class="px-4 py-2" align="center">
                     <v-col cols="12" class="text-center">
@@ -100,31 +117,6 @@ onMounted(() => {
                     </v-col>
                     <v-col v-if="activeSchedule?.lastError" cols="12" class="text-center">
                         <p>Last Error: {{ activeSchedule?.lastError }}</p>
-                    </v-col>
-                </v-row>
-                <v-row class="px-4 py-2" align="center">
-                    <v-col cols="12" class="text-center">
-                        <h2>Edit Active Schedule</h2>
-                    </v-col>
-                    <v-col cols="12" class="text-center">
-                        <p>Editing functionality not implemented yet.</p>
-                    </v-col>
-                </v-row>
-            </div>
-
-            <div v-if="showLatestMeasurement">
-                <v-row class="px-4 py-2" align="center">
-                    <v-col cols="12" class="text-center">
-                        <h2>Latest Measurement</h2>
-                    </v-col>
-                    <v-col cols="6">
-                        <p>Inside Temperature: {{ latestMeasurement?.insideTemperatureCelsius }} °C</p>
-                    </v-col>
-                    <v-col cols="6">
-                        <p>Humidity: {{ latestMeasurement?.humidityPercentage }} %</p>
-                    </v-col>
-                    <v-col cols="12" class="text-center">
-                        <p>Retrieved At: {{ new Date(latestMeasurement?.retrievedAt ?? "").toLocaleString() }}</p>
                     </v-col>
                 </v-row>
             </div>
