@@ -137,16 +137,23 @@ onMounted(() => {
             max-width="500">
             <v-row class="px-4 py-2" align="center">
                 <v-col cols="12" class="text-center">
-                    <h2>Latest Measurement</h2>
+                    <span class="text-headline-small">Latest Measurement</span>
+                    
                 </v-col>
-                <v-col cols="6">
-                    <p>Inside Temperature: {{ latestMeasurement?.insideTemperatureCelsius }} °C</p>
+                <v-col cols="6" class="d-flex align-center justify-center">
+                        <v-icon size="x-large" icon="mdi-thermometer"></v-icon>
+<span class="text-display-small">{{ latestMeasurement?.insideTemperatureCelsius }}</span>
+                         
+
+                         <v-icon size="x-large" icon="mdi-temperature-celsius"></v-icon>
                 </v-col>
-                <v-col cols="6">
-                    <p>Humidity: {{ latestMeasurement?.humidityPercentage }} %</p>
+                <v-col cols="6" class="d-flex align-center justify-center">
+                    <v-icon size="x-large" icon="mdi-water"></v-icon>
+                     <span class="text-display-small">{{ latestMeasurement?.humidityPercentage }}</span>
+                    <v-icon size="x-large" icon="mdi-percent"></v-icon>
                 </v-col>
                 <v-col cols="12" class="text-center">
-                    <p>Retrieved At: {{ new Date(latestMeasurement?.retrievedAt ?? "").toLocaleString() }}</p>
+                    <span class="text-body-small">Retrieved At: {{ new Date(latestMeasurement?.retrievedAt ?? "").toLocaleString() }}</span>                    
                 </v-col>
             </v-row>
         </v-card>
