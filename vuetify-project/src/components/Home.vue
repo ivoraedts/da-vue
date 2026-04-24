@@ -31,8 +31,15 @@ async function getActiveTrackingSchedule() {
     const response = await fetch('/api/tadotemperature/getActiveSchedule')
 
     if (!response.ok) {
-        console.log("No active schedule");
-        activeScheduleExists.value = false;
+
+        if (response.status === 404) {
+            console.log("No active schedule found (404)");
+            activeSchedulesAreRetrieved.value = true;
+            activeScheduleExists.value = false;
+        } else {
+            console.log("Error retrieving active schedule: " + response.statusText);
+            activeSchedulesAreRetrieved.value = false;
+        }        
     }
     else {
         const data = await response.json() as TadoRetrievalScheduleModel;
@@ -43,6 +50,7 @@ async function getActiveTrackingSchedule() {
             activeSchedule.value.nextRetrievalTimeString = new Date(activeSchedule.value.nextRetrievalTime).toLocaleString();
             activeSchedule.value.lastRetrievalTimeString = new Date(activeSchedule.value.lastRetrievalTime).toLocaleString();
         } else {
+            //this should never happen!
             console.log("No active schedule");
             activeScheduleExists.value = false;
         }
