@@ -4,6 +4,21 @@ import InitializeTracking from '@/components/InitializeTracking.vue'
 import type { TadoRetrievalScheduleModel } from '@/models/TadoRetrievalScheduleModel';
 import type { LatestMeasurement } from '@/models/LatestMeasurement';
 
+const showSection: Ref<string, string> = ref("overview");
+
+function showOverview() {
+    showSection.value = "overview";
+}
+
+function showDataExplorer() {
+    showSection.value = "data explorer";
+}
+
+function showScheduleEditor() {
+    showSection.value = "schedule editor";
+}
+
+
 async function getActiveTrackingSchedule() {
     // Vite proxies '/api/tadotemperature/getActiveSchedule' to 'http://localhost:5160/api/tadotemperature/getActiveSchedule'
     const response = await fetch('/api/tadotemperature/getActiveSchedule')
@@ -69,7 +84,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <v-container>
+    <v-container v-if="showSection === 'overview'">
         <v-card class="mx-auto mt-5" max-width="500">
             <v-row>
                 <v-col cols="12" class="text-center">
@@ -101,7 +116,16 @@ onMounted(() => {
             <div v-if="canEditActiveSchedule">
                 <v-row class="px-4 py-2" align="center">
                     <v-col cols="12" class="text-center">
-                        <h2>Active Schedule</h2>
+                        <v-row class="px-4 py-2" align="center">
+                            <v-col cols="6" class="text-right">
+                                <h2>Active Schedule</h2>
+                            </v-col>
+                            <v-col cols="6" class="text-left">
+                                <v-btn icon @click="showScheduleEditor()">
+                                    <v-icon>mdi-pencil</v-icon>
+                                </v-btn>
+                            </v-col>
+                        </v-row>
                     </v-col>
                     <v-col cols="6">
                         <p>Schedule ID: {{ activeSchedule?.scheduleId }}</p>
@@ -120,6 +144,18 @@ onMounted(() => {
                     </v-col>
                 </v-row>
             </div>
+        </v-card>
+    </v-container>
+    <v-container v-if="showSection === 'schedule editor'">
+        <v-card class="mx-auto mt-5" max-width="500">
+            <v-row>
+                <v-col cols="12" class="text-center">
+                    <h1>Schedule editor</h1>
+                    <v-btn variant="tonal" @click="showOverview()" prepend-icon="mdi-undo" elevated color="red">
+                        Cancel
+                    </v-btn>
+                </v-col>
+            </v-row>
         </v-card>
     </v-container>
 </template>

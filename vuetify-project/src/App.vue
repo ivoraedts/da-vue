@@ -6,7 +6,6 @@
   import { ref, type Ref  } from 'vue'
 
   const showPage: Ref<string, string> = ref("home");
-  showPage.value = "hello world page";
 
   function showAboutPage() {
     showPage.value = "hello world page";
