@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, type Ref, onMounted, computed } from 'vue'
 import InitializeTracking from '@/components/InitializeTracking.vue'
+import ScheduleEditor from '@/components/sections/ScheduleEditor.vue'
 import type { TadoRetrievalScheduleModel } from '@/models/TadoRetrievalScheduleModel';
 import type { LatestMeasurement } from '@/models/LatestMeasurement';
 
@@ -8,6 +9,11 @@ const showSection: Ref<string, string> = ref("overview");
 
 function showOverview() {
     showSection.value = "overview";
+}
+
+function showOverviewWithComment(name: string) {
+    console.log("Showing overview for " + name);
+    showOverview();
 }
 
 function showDataExplorer() {
@@ -146,16 +152,7 @@ onMounted(() => {
             </div>
         </v-card>
     </v-container>
-    <v-container v-if="showSection === 'schedule editor'">
-        <v-card class="mx-auto mt-5" max-width="500">
-            <v-row>
-                <v-col cols="12" class="text-center">
-                    <h1>Schedule editor</h1>
-                    <v-btn variant="tonal" @click="showOverview()" prepend-icon="mdi-undo" elevated color="red">
-                        Cancel
-                    </v-btn>
-                </v-col>
-            </v-row>
-        </v-card>
-    </v-container>
+    <div v-if="showSection === 'schedule editor'">
+        <ScheduleEditor @response="(msg) => showOverviewWithComment(msg.action)"  />
+    </div>
 </template>
