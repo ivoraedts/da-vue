@@ -19,6 +19,9 @@ public class DataRetrievalService : IDataRetrievalService
     private readonly Tado _tadoService;
     private readonly DaVueDbContext _dbContext;
 
+    const int DelayInMinutesWithoutActiveSchedule = 5;
+    const int DelayInMinutesAfterFailure = 5;
+
     public DataRetrievalService(ILogger<DataRetrievalService> logger, Tado tadoService, DaVueDbContext dbContext)
     {
         _logger = logger;
@@ -37,16 +40,22 @@ public class DataRetrievalService : IDataRetrievalService
             _logger.LogInformation($"ToEarlyException occurred: {ex.Message}. Next retrieval time is at: {ex.NextRetrievalTime:O}, so waiting for {ex.NextRetrievalTime - DateTime.UtcNow}.");
             return ex.NextRetrievalTime;
         }
+        catch (NoActiveScheduleException)
+        {
+            _logger.LogWarning($"No active schedule found. Trying again in {DelayInMinutesWithoutActiveSchedule} few minutes. At {DateTime.UtcNow.AddMinutes(DelayInMinutesWithoutActiveSchedule):O}.");
+            return DateTime.UtcNow.AddMinutes(DelayInMinutesWithoutActiveSchedule);
+        }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while retrieving data.");
-            return DateTime.UtcNow.AddMinutes(5); // In case something goes wrong, try again in 5 minutes
+            _logger.LogError($"An error occurred while retrieving data: {ex}");
+            return DateTime.UtcNow.AddMinutes(DelayInMinutesAfterFailure); // In case something goes wrong, try again in 5 minutes
         }
     }
 
     private async Task<DateTime> TryRetrieveDataOrThrowException(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Starting data retrieval at: {time}", DateTimeOffset.Now);
+
 
         var schedule = await GetValidatedActiveSchedule();
         try
@@ -65,6 +74,7 @@ public class DataRetrievalService : IDataRetrievalService
             await RegisterFailureInSchedule(schedule, ex);
             throw; // Rethrow the exception to be handled in the calling method and to avoid updating the next retrieval time, since the retrieval was not successful.
         }
+
     }
 
     private async Task<TadoRetrievalSchedule> GetValidatedActiveSchedule()
@@ -72,7 +82,7 @@ public class DataRetrievalService : IDataRetrievalService
         var activeSchedule = await _dbContext.TadoRetrievalSchedules.Where(s => s.IsActive).OrderBy(s => s.ScheduleId).FirstOrDefaultAsync();
         if (activeSchedule == null)
         {
-            throw new Exception("No active retrieval schedule found.");
+            throw new NoActiveScheduleException();
         }
 
         if (activeSchedule.NextRetrievalTime > DateTimeOffset.Now)
@@ -263,7 +273,7 @@ public class DataRetrievalService : IDataRetrievalService
         {
             schedule.LastError = ex.Message;
             _logger.LogError(ex, $"Data retrieval failed {schedule.ConsecutiveFailures} times in a row for schedule ID {schedule.ScheduleId}. Deactivating the schedule to prevent further issues.");
-            schedule.IsActive = false;            
+            schedule.IsActive = false;
         }
         _dbContext.TadoRetrievalSchedules.Update(schedule);
         await _dbContext.SaveChangesAsync();
