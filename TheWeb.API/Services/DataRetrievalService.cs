@@ -45,6 +45,13 @@ public class DataRetrievalService : IDataRetrievalService
             _logger.LogWarning($"No active schedule found. Trying again in {DelayInMinutesWithoutActiveSchedule} few minutes. At {DateTime.UtcNow.AddMinutes(DelayInMinutesWithoutActiveSchedule):O}.");
             return DateTime.UtcNow.AddMinutes(DelayInMinutesWithoutActiveSchedule);
         }
+        catch (TadoRequestThrottledException ex)
+        {
+            var delay = DelayInMinutesAfterFailure * ex.NumberOfConsecutiveFailures * ex.NumberOfConsecutiveFailures * 2;
+            var nextRetrievalTime = DateTime.UtcNow.AddMinutes(delay);
+            _logger.LogWarning($"TadoRequestThrottledException occurred. Number of consecutive failures: {ex.NumberOfConsecutiveFailures}. Trying again in {delay} minutes. At {nextRetrievalTime:O}.");
+            return nextRetrievalTime;
+        }
         catch (Exception ex)
         {
             _logger.LogError($"An error occurred while retrieving data: {ex}");
@@ -68,6 +75,12 @@ public class DataRetrievalService : IDataRetrievalService
 
             _logger.LogInformation("Data retrieval completed successfully at: {time}", DateTimeOffset.Now);
             return schedule.NextRetrievalTime;
+        }
+        catch (KoenZomers.Tado.Api.Exceptions.RequestThrottledException ex)
+        {
+            await RegisterFailureInSchedule(schedule, ex);
+            _logger.LogError($"Request was throttled by the Tado API with error: {ex}");
+            throw new TadoRequestThrottledException(schedule.ConsecutiveFailures, ex.Message);
         }
         catch (Exception ex)
         {
