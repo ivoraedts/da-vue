@@ -24,7 +24,7 @@ public class RunScheduledRetrievals : BackgroundService
         // Loop until the application is shut down
         while (!stoppingToken.IsCancellationRequested)
         {
-            _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+            _logger.LogInformation($"Worker running at: {DateTimeOffset.Now}");
 
             try
             {

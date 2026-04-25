@@ -61,7 +61,7 @@ public class DataRetrievalService : IDataRetrievalService
 
     private async Task<DateTime> TryRetrieveDataOrThrowException(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Starting data retrieval at: {time}", DateTimeOffset.Now);
+        _logger.LogInformation($"Starting data retrieval at: {DateTimeOffset.Now}");
 
 
         var schedule = await GetValidatedActiveSchedule();
@@ -73,7 +73,7 @@ public class DataRetrievalService : IDataRetrievalService
             await StoreRetrievedData(retrievedData, schedule.ScheduleId);
             await UpdateRetrievalSchedule(schedule);
 
-            _logger.LogInformation("Data retrieval completed successfully at: {time}", DateTimeOffset.Now);
+            _logger.LogInformation($"Data retrieval completed successfully at: {DateTimeOffset.Now}");
             return schedule.NextRetrievalTime;
         }
         catch (KoenZomers.Tado.Api.Exceptions.RequestThrottledException ex)
@@ -285,7 +285,7 @@ public class DataRetrievalService : IDataRetrievalService
         if (schedule.ConsecutiveFailures >= 5)
         {
             schedule.LastError = ex.Message;
-            _logger.LogError(ex, $"Data retrieval failed {schedule.ConsecutiveFailures} times in a row for schedule ID {schedule.ScheduleId}. Deactivating the schedule to prevent further issues.");
+            _logger.LogError($"Data retrieval failed {schedule.ConsecutiveFailures} times in a row for schedule ID {schedule.ScheduleId}. Deactivating the schedule to prevent further issues. Error: {ex}");
             schedule.IsActive = false;
         }
         _dbContext.TadoRetrievalSchedules.Update(schedule);
