@@ -37,4 +37,24 @@ public class MeasurementsController : ControllerBase
             RetrievedAt = latestMeasurement.RetrievedAt
         });
     }
+
+    [Route("last10")] // This makes the URL: api/measurements/last10
+    [HttpGet]
+    public async Task<ActionResult<List<DataMeasureMents>>> GetLast10Measurements()
+    {
+        var latestMeasurements = await _dbContext.TadoRetrievedData.OrderByDescending(data => data.RetrievalId).Take(10).ToListAsync();
+        if (latestMeasurements == null || latestMeasurements.Count == 0)
+        {
+            return NotFound("No measurements found.");
+        }
+
+        var result = latestMeasurements.Select(m => new DataMeasureMents
+        {
+            InsideTemperatureCelsius = m.InsideTemperatureCelsius,
+            HumidityPercentage = m.HumidityPercentage,
+            RetrievedAt = m.RetrievedAt
+        }).ToList();
+
+        return Ok(result);
+    }
 }
