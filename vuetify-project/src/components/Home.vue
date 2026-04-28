@@ -5,6 +5,7 @@ import ScheduleEditor from '@/components/sections/ScheduleEditor.vue'
 import DataExplorer from '@/components/sections/DataExplorer.vue'
 import type { TadoRetrievalScheduleModel } from '@/models/TadoRetrievalScheduleModel';
 import type { LatestMeasurement } from '@/models/LatestMeasurement';
+import { getMaterialColorForTemperature } from '@/utils/TemperatureDisplay';
 
 const showSection: Ref<string, string> = ref("overview");
 
@@ -94,30 +95,7 @@ const latestMeasurement: Ref<LatestMeasurement | null> = ref(null);
 const latestMeasurementColor: Ref<string> = ref("grey");
 function setColorBasedOnTemperature(temp: number) {
     if (latestMeasurement.value) {
-
-        if (temp < 15) { latestMeasurementColor.value = "green-darken-4"; }
-        else if (temp < 16) { latestMeasurementColor.value = "green-darken-1"; }
-        else if (temp < 16.5) { latestMeasurementColor.value = "lime-accent-4"; }
-        else if (temp <= 17.0) { latestMeasurementColor.value = "lime-accent-3"; }
-        else if (temp <= 17.5) { latestMeasurementColor.value = "lime-accent-2"; }
-        else if (temp <= 18.5) { latestMeasurementColor.value = "yellow-lighten-4"; }
-        else if (temp <= 18.5) { latestMeasurementColor.value = "yellow-accent-4"; }
-        else if (temp <= 19.0) { latestMeasurementColor.value = "orange-lighten-4"; }
-        else if (temp <= 19.5) { latestMeasurementColor.value = "orange-lighten-2"; }
-        else if (temp <= 20.0) { latestMeasurementColor.value = "orange"; }
-        else if (temp <= 20.5) { latestMeasurementColor.value = "orange-darken-2"; }
-        else if (temp <= 21.0) { latestMeasurementColor.value = "orange-darken-3"; }
-        else if (temp <= 21.5) { latestMeasurementColor.value = "orange-darken-4"; }
-        else if (temp <= 22.0) { latestMeasurementColor.value = "red"; }
-        else if (temp <= 22.5) { latestMeasurementColor.value = "red-darken-2"; }
-        else if (temp <= 23.0) { latestMeasurementColor.value = "red-darken-3"; }
-        else if (temp <= 24.0) { latestMeasurementColor.value = "red-darken-4"; }
-        else if (temp <= 25.0) { latestMeasurementColor.value = "purple-darken-3"; }
-        else if (temp <= 26.0) { latestMeasurementColor.value = "purple-darken-4"; }
-        else if (temp <= 27.0) { latestMeasurementColor.value = "gray-darken-3"; }
-        else {
-            latestMeasurementColor.value = "gray-darken-4";
-        }
+            latestMeasurementColor.value = getMaterialColorForTemperature(temp);       
     }
 }
 
