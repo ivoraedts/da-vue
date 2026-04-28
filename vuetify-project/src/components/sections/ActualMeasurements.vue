@@ -40,7 +40,7 @@ async function getActualMeasurements() {
     function setTemperatureGradient(lastTemperature: number) {
         console.log("Last Temperature: " + lastTemperature);
         if (lastTemperature < 18) { t_selectedGradient.value = colder_temperature_gradients; }
-        else if (lastTemperature < 20) { t_selectedGradient.value = cold_temperature_gradients; }        
+        else if (lastTemperature < 20) { t_selectedGradient.value = cold_temperature_gradients; }
         else if (lastTemperature < 22) { t_selectedGradient.value = medium_temperature_gradients; }
         else if (lastTemperature < 24) { t_selectedGradient.value = warm_temperature_gradients; }
         else {
@@ -60,78 +60,72 @@ async function getActualMeasurements() {
 }
 
 onMounted(() => {
-  getActualMeasurements();
+    getActualMeasurements();
 })
 
-  var colder_temperature_gradients: string[] = ['#EEFF41','#C6FF00','#AEEA00', '#43A047', '#1B5E20'];
-  var cold_temperature_gradients: string[] = ['#FF9800', '#FFC107', '#FFD54F', '#FFEB3B', '#FFF9C4'];
-  var medium_temperature_gradients: string[] = ['red', 'orange'];
-  var warm_temperature_gradients: string[] = ['#B71C1C', 'red'];
-  var hot_temperature_gradients: string[] = ['#black', '#4A148C', '#6A1B9A', '#B71C1C'];
+var colder_temperature_gradients: string[] = ['#EEFF41', '#C6FF00', '#AEEA00', '#43A047', '#1B5E20'];
+var cold_temperature_gradients: string[] = ['#FF9800', '#FFC107', '#FFD54F', '#FFEB3B', '#FFF9C4'];
+var medium_temperature_gradients: string[] = ['red', 'orange'];
+var warm_temperature_gradients: string[] = ['#B71C1C', 'red'];
+var hot_temperature_gradients: string[] = ['#black', '#4A148C', '#6A1B9A', '#B71C1C'];
 
-  var low_humidity_gradients: string[] = ['#1976D2', '#FFFF00'];
-  var medium_humidity_gradients: string[] = ['#1976D2', '#2196F3', '#E3F2FD'];
-  var high_humidity_gradients: string[] = ['#0D47A1', '#2196F3'];
+var low_humidity_gradients: string[] = ['#1976D2', '#FFFF00'];
+var medium_humidity_gradients: string[] = ['#1976D2', '#2196F3', '#E3F2FD'];
+var high_humidity_gradients: string[] = ['#0D47A1', '#2196F3'];
 
-  const t_selectedGradient: Ref<string[]> = ref(medium_temperature_gradients)
-  const temperatures: Ref<number[]> = ref([0, 2, 5, 9, 5, 10, 3, 5, 0, 0, 1, 8, 2, 9, 0])
+const t_selectedGradient: Ref<string[]> = ref(medium_temperature_gradients)
+const temperatures: Ref<number[]> = ref([0, 2, 5, 9, 5, 10, 3, 5, 0, 0, 1, 8, 2, 9, 0])
 
-  const h_selectedGradient: Ref<string[]> = ref(medium_humidity_gradients)
-  const humidities: Ref<number[]> = ref([0, 2, 5, 9, 5, 10, 3, 5, 0, 0, 1, 8, 2, 9, 0])
+const h_selectedGradient: Ref<string[]> = ref(medium_humidity_gradients)
+const humidities: Ref<number[]> = ref([0, 2, 5, 9, 5, 10, 3, 5, 0, 0, 1, 8, 2, 9, 0])
 
-  const firstMeasurementTime: Ref<string> = ref("");
-  const lastMeasurementTime: Ref<string> = ref("");
+const firstMeasurementTime: Ref<string> = ref("");
+const lastMeasurementTime: Ref<string> = ref("");
 
-  const fill: Ref<boolean> = ref(true)
-  const padding: Ref<number> = ref(2)
-  const smooth: Ref<boolean> = ref(true)
-  const lineWidth: Ref<number> = ref(2)
+const fill: Ref<boolean> = ref(true)
+const padding: Ref<number> = ref(2)
+const smooth: Ref<boolean> = ref(true)
+const lineWidth: Ref<number> = ref(2)
 
-  const maxTemperature: Ref<number> = ref(2)
-  const minTemperature: Ref<number> = ref(2)
-  const maxHumidity: Ref<number> = ref(2)
-  const minHumidity: Ref<number> = ref(2)
+const minScaleTemperature: Ref<string | number | undefined> = ref(18)
+const maxScaleTemperature: Ref<string | number | undefined> = ref(23)
+const minScaleHumidity: Ref<string | number | undefined> = ref(30)
+const maxScaleHumidity: Ref<string | number | undefined> = ref(60)
+
+const maxTemperature: Ref<number> = ref(2)
+const minTemperature: Ref<number> = ref(2)
+const maxHumidity: Ref<number> = ref(2)
+const minHumidity: Ref<number> = ref(2)
 </script>
 
 <template>
-        <v-row>
-            <v-col cols="12" class="text-center">
-                <br/>
-                <span class="text-headline-small">Actual Data Measurements ({{ firstMeasurementTime }} - {{ lastMeasurementTime }})</span>
-            </v-col>
-        </v-row>
-        <v-row>
-            <v-col cols="12" class="text-center">
-                <br/>
-                <span class="text-title-medium">Actual Temperature Measurements ({{ minTemperature }}°C - {{ maxTemperature }}°C)</span>
-            </v-col>
-        </v-row>
+    <v-row>
+        <v-col cols="12" class="text-center">
+            <br />
+            <span class="text-headline-small">Actual Data Measurements ({{ firstMeasurementTime }} - {{
+                lastMeasurementTime }})</span>
+        </v-col>
+    </v-row>
+    <v-row>
+        <v-col cols="12" class="text-center">
+            <br />
+            <span class="text-title-medium">Actual Temperature Measurements ({{ minTemperature }}°C - {{ maxTemperature
+            }}°C)</span>
+        </v-col>
+    </v-row>
     <v-container fluid>
-    <v-sparkline
-      :fill="fill"
-      :gradient="t_selectedGradient"
-      :line-width="lineWidth"
-      :model-value="temperatures"
-      :padding="padding"
-      :smooth="smooth"
-      auto-draw
-    ></v-sparkline>
+        <v-sparkline :fill="fill" :gradient="t_selectedGradient" :line-width="lineWidth" :model-value="temperatures"
+            :padding="padding" :smooth="smooth" auto-draw :min="minScaleTemperature" :max="maxScaleTemperature"></v-sparkline>
     </v-container>
-            <v-row>
-            <v-col cols="12" class="text-center">
-                <br/>
-                <span class="text-title-medium">Actual Humidity Measurements ({{ minHumidity }}% - {{ maxHumidity }}%)</span>
-            </v-col>
-        </v-row>
+    <v-row>
+        <v-col cols="12" class="text-center">
+            <br />
+            <span class="text-title-medium">Actual Humidity Measurements ({{ minHumidity }}% - {{ maxHumidity
+            }}%)</span>
+        </v-col>
+    </v-row>
     <v-container fluid>
-    <v-sparkline
-      :fill="fill"
-      :gradient="h_selectedGradient"
-      :line-width="lineWidth"
-      :model-value="humidities"
-      :padding="padding"
-      :smooth="smooth"
-      auto-draw
-    ></v-sparkline>
+        <v-sparkline :fill="fill" :gradient="h_selectedGradient" :line-width="lineWidth" :model-value="humidities"
+            :padding="padding" :smooth="smooth" auto-draw :min="minScaleHumidity" :max="maxScaleHumidity"></v-sparkline>
     </v-container>
 </template>
