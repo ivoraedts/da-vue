@@ -97,7 +97,7 @@ const minHumidity: Ref<number> = ref(2)
             </v-col>
         </v-row>
         <!-- Temperature Section -->
-        <div class="d-flex align-stretch mb-4">
+        <div class="d-flex align-stretch mb-4 small_border">
             <!-- Labels: They will now stretch/shrink to match the sparkline height -->
             <div class="d-flex flex-column justify-space-between pr-2 py-1 text-caption text-grey-darken-1">
                 <div>{{ maxScaleTemperature }}°</div>
@@ -119,7 +119,7 @@ const minHumidity: Ref<number> = ref(2)
             </v-col>
         </v-row>
         <!-- Humidity Section -->
-        <div class="d-flex align-stretch mb-4">
+        <div class="d-flex align-stretch mb-4 small_border">
             <!-- Labels: They will now stretch/shrink to match the sparkline height -->
             <div class="d-flex flex-column justify-space-between pr-2 py-1 text-caption text-grey-darken-1">
                 <div>{{ maxScaleHumidity }}%</div>
@@ -135,3 +135,10 @@ const minHumidity: Ref<number> = ref(2)
         </div>
     </div>
 </template>
+<style scoped>
+.small_border {
+    border: 1px solid gray;
+    border-radius: 8px;
+    padding: 1px;
+}
+</style>
