@@ -10,7 +10,16 @@ import { getMaterialColorForTemperature } from '@/utils/TemperatureDisplay';
 const showSection: Ref<string, string> = ref("overview");
 
 function showOverview() {
-    showSection.value = "overview";
+    showSection.value = "overview";    
+    refreshDataIfNeeded();
+}
+
+function refreshDataIfNeeded() {
+    //refresh overview data if last refresh was more than 2 minutes ago
+    if (new Date().getTime() - lastRefreshTime.getTime() > 2 * 60 * 1000) {
+        getLatestMeasurement();
+        getActiveTrackingSchedule();
+    }
 }
 
 function showOverviewWithComment(name: string) {
@@ -79,6 +88,7 @@ async function getLatestMeasurement() {
             console.log("No measurement data available");
         }
     }
+    lastRefreshTime = new Date();
 }
 
 const activeSchedulesAreRetrieved: Ref<boolean> = ref(false);
@@ -98,6 +108,8 @@ function setColorBasedOnTemperature(temp: number) {
             latestMeasurementColor.value = getMaterialColorForTemperature(temp);       
     }
 }
+
+var lastRefreshTime: Date = new Date();
 
 onMounted(() => {
     getActiveTrackingSchedule();

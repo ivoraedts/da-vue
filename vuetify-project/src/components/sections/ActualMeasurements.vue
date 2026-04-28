@@ -22,12 +22,12 @@ async function getActualMeasurements() {
             temperatures.value = data.map(m => m.insideTemperatureCelsius);
             humidities.value = data.map(m => m.humidityPercentage);
 
-            var graficalTemperatureData : GraficalData = getGraficalTemperatureData(data.map(m => m.insideTemperatureCelsius), 0);
+            var graficalTemperatureData: GraficalData = getGraficalTemperatureData(data.map(m => m.insideTemperatureCelsius), 0);
             t_selectedGradient.value = graficalTemperatureData.gradient.reverse();
             minScaleTemperature.value = graficalTemperatureData.minScale;
             maxScaleTemperature.value = graficalTemperatureData.maxScale;
 
-            var graficalHumidityData : GraficalData = getGraficalHumidityData(data.map(m => m.humidityPercentage), 0);
+            var graficalHumidityData: GraficalData = getGraficalHumidityData(data.map(m => m.humidityPercentage), 0);
             h_selectedGradient.value = graficalHumidityData.gradient.reverse();
             minScaleHumidity.value = graficalHumidityData.minScale;
             maxScaleHumidity.value = graficalHumidityData.maxScale;
@@ -96,11 +96,21 @@ const minHumidity: Ref<number> = ref(2)
                     }}°C)</span>
             </v-col>
         </v-row>
-        <v-container fluid>
-            <v-sparkline :fill="fill" :gradient="t_selectedGradient" :line-width="lineWidth" :model-value="temperatures"
-                :padding="padding" :smooth="smooth" auto-draw :min="minScaleTemperature"
-                :max="maxScaleTemperature"></v-sparkline>
-        </v-container>
+        <!-- Temperature Section -->
+        <div class="d-flex align-stretch mb-4">
+            <!-- Labels: They will now stretch/shrink to match the sparkline height -->
+            <div class="d-flex flex-column justify-space-between pr-2 py-1 text-caption text-grey-darken-1">
+                <div>{{ maxScaleTemperature }}°</div>
+                <div>{{ minScaleTemperature }}°</div>
+            </div>
+
+            <!-- Sparkline Wrapper: flex-grow-1 ensures it uses all available width -->
+            <div class="flex-grow-1">
+                <v-sparkline :fill="fill" :gradient="t_selectedGradient" :line-width="lineWidth"
+                    :model-value="temperatures" :padding="padding" :smooth="smooth" auto-draw :min="minScaleTemperature"
+                    :max="maxScaleTemperature"></v-sparkline>
+            </div>
+        </div>
         <v-row>
             <v-col cols="12" class="text-center">
                 <br />
@@ -108,10 +118,20 @@ const minHumidity: Ref<number> = ref(2)
                     }}%)</span>
             </v-col>
         </v-row>
-        <v-container fluid>
-            <v-sparkline :fill="fill" :gradient="h_selectedGradient" :line-width="lineWidth" :model-value="humidities"
-                :padding="padding" :smooth="smooth" auto-draw :min="minScaleHumidity"
-                :max="maxScaleHumidity"></v-sparkline>
-        </v-container>
+        <!-- Humidity Section -->
+        <div class="d-flex align-stretch mb-4">
+            <!-- Labels: They will now stretch/shrink to match the sparkline height -->
+            <div class="d-flex flex-column justify-space-between pr-2 py-1 text-caption text-grey-darken-1">
+                <div>{{ maxScaleHumidity }}%</div>
+                <div>{{ minScaleHumidity }}%</div>
+            </div>
+            <!-- Sparkline Wrapper: flex-grow-1 ensures it uses all available width -->
+            <div class="flex-grow-1">
+
+                <v-sparkline :fill="fill" :gradient="h_selectedGradient" :line-width="lineWidth"
+                    :model-value="humidities" :padding="padding" :smooth="smooth" auto-draw :min="minScaleHumidity"
+                    :max="maxScaleHumidity"></v-sparkline>
+            </div>
+        </div>
     </div>
 </template>
