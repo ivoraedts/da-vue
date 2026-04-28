@@ -17,7 +17,7 @@ async function getActualMeasurements() {
         const data = await response.json() as DataMeasureMents[];
         if (data !== null) {
             showLastMeasurements.value = true;
-            lastMeasurements.value = data;
+            lastMeasurements.value = data.reverse();
             console.log("Number of Last Measurements: " + data.length);
             temperatures.value = data.map(m => m.insideTemperatureCelsius);
             humidities.value = data.map(m => m.humidityPercentage);
