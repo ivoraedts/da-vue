@@ -22,6 +22,8 @@ namespace TheWeb.API.Data
         public DbSet<TadoToken> TadoTokens { get; set; }
         public DbSet<TadoRetrievalSchedule> TadoRetrievalSchedules { get; set; }
         public DbSet<TadoRetrievedData> TadoRetrievedData { get; set; }
+        public DbSet<RetrievalAggregation> HourlyAggregations { get; set; }
+        //public DbSet<RetrievalAggregation> DailyAggregations { get; set; }
     }
 
     public static class ServiceCollectionExtensions

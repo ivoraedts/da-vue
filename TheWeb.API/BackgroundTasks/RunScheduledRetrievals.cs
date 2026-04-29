@@ -54,8 +54,12 @@ public class RunScheduledRetrievals : BackgroundService
         using (var scope = _serviceScopeFactory.CreateScope())
         {
             var dataRetrievalService = scope.ServiceProvider.GetRequiredService<IDataRetrievalService>();
-
             var nextRetrievalTime = await dataRetrievalService.RetrieveDataAsync(stoppingToken);
+
+            //todo: I could optimise this by only running this after some data was retrieved
+            var hourlyAggregationService = scope.ServiceProvider.GetRequiredService<IHourlyDataAggregationService>();
+            await hourlyAggregationService.AggregateDataAsync(stoppingToken);
+            
             return nextRetrievalTime;
         }
     }
