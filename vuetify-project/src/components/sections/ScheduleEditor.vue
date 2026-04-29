@@ -32,23 +32,21 @@ async function getActiveTrackingSchedule() {
 }
 
 async function editItem() {
-  const response = await fetch(`/api/tadotemperature/editSchedule/${currentSchedule.value?.scheduleId}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(currentSchedule.value)
-  })
-  if (!response.ok)
-  {
-    alert("Could not update task. Is the Backend running?");
-    console.error(`API error: ${response.status}`)
-    alert(response);
-  }
-  else
-  {
-    emit('response', { action: 'scheduleUpdated' });
-  }
+    const response = await fetch(`/api/tadotemperature/editSchedule/${currentSchedule.value?.scheduleId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(currentSchedule.value)
+    })
+    if (!response.ok) {
+        alert("Could not update task. Is the Backend running?");
+        console.error(`API error: ${response.status}`)
+        alert(response);
+    }
+    else {
+        emit('response', { action: 'scheduleUpdated' });
+    }
 }
 
 const currentSchedule: Ref<TadoRetrievalScheduleModel | null> = ref(null);
@@ -63,12 +61,14 @@ onMounted(() => {
 
 <template>
     <v-container>
-        <v-card class="mx-auto mt-5" max-width="500">
+        <v-card variant="elevated" color="primary" class="mx-auto mt-5" max-width="500">
             <v-row>
                 <v-col cols="12" class="text-center">
                     <h1>Schedule editor</h1>
                 </v-col>
             </v-row>
+        </v-card>
+        <v-card class="mx-auto mt-5" max-width="500">
             <v-row v-if="currentSchedule != null" class="px-4 py-2" align="center">
                 <v-col cols="12">
                     <span class="text-headline-small">Interval in minutes:</span>
@@ -90,38 +90,60 @@ onMounted(() => {
             </v-row>
             <v-row v-if="currentSchedule != null" class="px-4 py-2" align="center">
                 <v-col cols="6" class="text-center">
-                    <v-btn variant="tonal" @click="editItem()" prepend-icon="mdi-undo" elevated color="red">
+                    <v-btn variant="elevated" @click="editItem()" prepend-icon="mdi-content-save" elevated color="primary" size="x-large">
                         Save
                     </v-btn>
                 </v-col>
                 <v-col cols="6" class="text-center">
-                    <v-btn variant="tonal" @click="goBackToOverview()" prepend-icon="mdi-undo" elevated color="red">
+                    <v-btn variant="elevated" @click="goBackToOverview()" prepend-icon="mdi-undo" elevated color="secondary" size="x-large">
                         Cancel
                     </v-btn>
                 </v-col>
             </v-row>
             <v-row v-if="currentSchedule == null" class="px-4 py-2" align="center">
                 <v-col cols="12" class="text-center">
-                    <v-btn variant="tonal" @click="goBackToOverview()" prepend-icon="mdi-undo" elevated color="red">
+                    <v-btn variant="elevated" @click="goBackToOverview()" prepend-icon="mdi-undo" elevated color="secondary" size="x-large">
                         Cancel
                     </v-btn>
                 </v-col>
             </v-row>
-            <v-row v-if="currentSchedule != null" class="px-4 py-2" align="center">
-                <v-col cols="12">
-                    <v-divider :thickness="4" color="primary"></v-divider>
+        </v-card>
+        <v-card v-if="currentSchedule != null" variant="elevated" color="secondary" class="mx-auto mt-5" max-width="500">
+            <v-row></v-row>
+            <v-row>
+                <v-col cols="1"></v-col>
+                <v-col cols="5">
+                    Next Retrieval Time:                    
+                </v-col>      
+                <v-col cols="6">
+                    {{ currentSchedule.nextRetrievalTimeString }}                   
                 </v-col>
             </v-row>
-            <v-row v-if="currentSchedule != null" class="px-4 py-2" align="center">
-                <v-col cols="12">
-                    <p>Next Retrieval Time: {{ currentSchedule.nextRetrievalTimeString }}</p>
-                    <p>Last Retrieval Time: {{ currentSchedule.lastRetrievalTimeString }}</p>
-                    <p v-if="currentSchedule.consecutiveFailures > 0">Consecutive Failures: {{
-                        currentSchedule.consecutiveFailures
-                    }}</p>
-                    <p v-if="currentSchedule.lastError != null">Last Error: {{ currentSchedule.lastError }}</p>
+            <v-row>
+                <v-col cols="1"></v-col>
+                <v-col cols="5">
+                    Last Retrieval Time:                    
+                </v-col>      
+                <v-col cols="6">
+                    {{ currentSchedule.lastRetrievalTimeString }}                   
                 </v-col>
             </v-row>
+            <v-row v-if="currentSchedule.consecutiveFailures > 0">
+                <v-col cols="1"></v-col>
+                <v-col cols="5">
+                    Consecutive Failures:               
+                </v-col>      
+                <v-col cols="6">
+                    {{ currentSchedule.consecutiveFailures }}                   
+                </v-col>
+            </v-row>
+             <v-row v-if="currentSchedule.lastError != null">
+                <v-col cols="1"></v-col>
+                <v-col cols="11">
+                    Last Error: {{ currentSchedule.lastError }}
+                </v-col>
+            </v-row>
+            <v-row></v-row>
         </v-card>
     </v-container>
 </template>
