@@ -85,20 +85,26 @@ async function addTrackingSchedule() {
 <template>
     <v-container>
         <v-card variant="elevated" color="primary" class="mx-auto mt-5" max-width="500">
-
+            <v-row>
+                <v-col cols="12" class="text-center">
+                    <h1>Initialize Tracking</h1>
+                </v-col>
+            </v-row>
+        </v-card>
+        <v-card variant="elevated" color="primary" class="mx-auto mt-5" max-width="500">
             <v-row class="px-4 py-2" align="center">
                 <v-col cols="12" class="text-center">
-                    <v-btn color="error" @click="goBackToOverview">
+                    <v-btn color="warning" @click="goBackToOverview" size="x-large">
                         Cancel Tado Temperature Tracking Initialisation
                     </v-btn>
                 </v-col>
             </v-row>
-
+        </v-card>
+        <v-card variant="elevated" color="primary" class="mx-auto mt-5" max-width="500">
             <v-row>
                 <v-col cols="12" class="text-center">
                     <v-stepper alt-labels v-model="currentStep" prev-text="Previous" next-text="Next"
                         :items="['Step 1', 'Step 2', 'Step 3']" hide-actions>
-
                         <template v-slot:item.1>
                             <v-card title="Step One" flat>
                                 <v-row>
@@ -145,9 +151,6 @@ async function addTrackingSchedule() {
                                                 Celsius.</li>
                                             <li>The Humidity is {{ ActualTadoData?.humidityPercentage }} %</li>
                                             <li>The (Tado) Home ID is {{ ActualTadoData?.homeId }}</li>
-                                            <li>The Token is stored in our database and the ID is {{
-                                                ActualTadoData?.tokenId }}
-                                            </li>
                                             <p>Set the tracking interval and click Finish to complete the initialisation
                                                 process
                                                 and start tracking your Tado temperatures.</p>
