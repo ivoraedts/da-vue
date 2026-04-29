@@ -21,6 +21,7 @@ public class DataRetrievalService : IDataRetrievalService
 
     const int DelayInMinutesWithoutActiveSchedule = 5;
     const int DelayInMinutesAfterFailure = 5;
+    const int MaxConsecutiveFailures = 7;
 
     public DataRetrievalService(ILogger<DataRetrievalService> logger, Tado tadoService, DaVueDbContext dbContext)
     {
@@ -52,6 +53,13 @@ public class DataRetrievalService : IDataRetrievalService
             _logger.LogWarning($"TadoRequestThrottledException occurred. Number of consecutive failures: {ex.NumberOfConsecutiveFailures}. Trying again in {delay} minutes. At {nextRetrievalTime:O}.");
             return nextRetrievalTime;
         }
+        catch (TadoApiNotRespondingException ex)
+        {
+            var delay = DelayInMinutesAfterFailure * ex.NumberOfConsecutiveFailures * ex.NumberOfConsecutiveFailures;
+            var nextRetrievalTime = DateTime.UtcNow.AddMinutes(delay);
+            _logger.LogWarning($"TadoApiNotRespondingException occurred. Number of consecutive failures: {ex.NumberOfConsecutiveFailures}. Trying again in {delay} minutes. At {nextRetrievalTime:O}. Error: {ex.Message}");
+            return nextRetrievalTime;
+        }
         catch (Exception ex)
         {
             _logger.LogError($"An error occurred while retrieving data: {ex}");
@@ -81,6 +89,12 @@ public class DataRetrievalService : IDataRetrievalService
             await RegisterFailureInSchedule(schedule, ex);
             _logger.LogError($"Request was throttled by the Tado API with error: {ex}");
             throw new TadoRequestThrottledException(schedule.ConsecutiveFailures, ex.Message);
+        }
+        catch (KoenZomers.Tado.Api.Exceptions.RequestFailedException ex)
+        {
+            await RegisterFailureInSchedule(schedule, ex);
+            _logger.LogError($"Tado API not responding: {ex}");
+            throw new TadoApiNotRespondingException(schedule.ConsecutiveFailures, ex.Message);
         }
         catch (Exception ex)
         {
@@ -282,7 +296,7 @@ public class DataRetrievalService : IDataRetrievalService
     private async Task RegisterFailureInSchedule(TadoRetrievalSchedule schedule, Exception ex)
     {
         schedule.ConsecutiveFailures += 1;
-        if (schedule.ConsecutiveFailures >= 5)
+        if (schedule.ConsecutiveFailures >= MaxConsecutiveFailures)
         {
             schedule.LastError = ex.Message;
             _logger.LogError($"Data retrieval failed {schedule.ConsecutiveFailures} times in a row for schedule ID {schedule.ScheduleId}. Deactivating the schedule to prevent further issues. Error: {ex}");
