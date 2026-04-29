@@ -23,13 +23,17 @@ function refreshDataIfNeeded() {
 }
 
 function showOverviewWithComment(comment: string) {
-    if (comment == 'scheduleUpdated') {
+    if (comment == 'scheduleUpdated' || comment == 'scheduleActivated') {
         console.log("Updating schedule on request of child component...");
         getLatestMeasurement();
         getActiveTrackingSchedule();
     }
     console.log("Showing overview for " + comment);
     showOverview();
+}
+
+function showInitializeTracking() {
+    showSection.value = "initialize tracking";
 }
 
 function showDataExplorer() {
@@ -143,7 +147,13 @@ onMounted(() => {
         </v-card>
 
         <v-card v-if="canInitializeTracking" class="mx-auto mt-5" max-width="500">
-            <InitializeTracking />
+            <v-row class="px-4 py-2" align="center">
+                <v-col cols="12" class="text-center">
+                    <v-btn color="primary" @click="showInitializeTracking()">
+                        Initialize Tado Temperature Tracking
+                    </v-btn>
+                </v-col>
+            </v-row>
         </v-card>
 
         <v-card variant="elevated" :color="latestMeasurementColor" v-if="showLatestMeasurement" class="mx-auto mt-5"
@@ -215,10 +225,15 @@ onMounted(() => {
         </v-card>
 
     </v-container>
-    <div v-if="showSection === 'schedule editor'">
-        <ScheduleEditor @response="(msg) => showOverviewWithComment(msg.action)" />
+    <div v-if="showSection === 'initialize tracking'">
+        <InitializeTracking @response="(msg) => showOverviewWithComment(msg.action)" />
     </div>
+
     <div v-if="showSection === 'data explorer'">
         <DataExplorer @response="(msg) => showOverviewWithComment(msg.action)" />
+    </div>
+
+    <div v-if="showSection === 'schedule editor'">
+        <ScheduleEditor @response="(msg) => showOverviewWithComment(msg.action)" />
     </div>
 </template>
