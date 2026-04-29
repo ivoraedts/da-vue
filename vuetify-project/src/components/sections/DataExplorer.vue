@@ -31,34 +31,35 @@ function showLastMonthMeasurements() {
 
 <template>
     <v-container>
-        <v-row>
-            <v-col cols="12" class="text-center">
-                <span class="text-headline-small">Data Explorer</span>
-            </v-col>
-        </v-row>
+                <v-card variant="elevated" color="primary" class="mx-auto mt-5" max-width="500">
+            <v-row>
+                <v-col cols="12" class="text-center">
+                    <h1>Data Explorer</h1>
+                </v-col>
+            </v-row>
         <v-row>
             <v-col cols="12" class="text-center">
                 <v-btn-toggle v-model="showSection" divided rounded="xl" border>
                     <v-btn value="actual measurements">
-                        <span class="hidden-xs">Actual</span>
+                        <span>Actual</span>
                         <v-icon end>
                             mdi-border-radius
                         </v-icon>
                     </v-btn>
                     <v-btn value="last day measurements">
-                        <span class="hidden-xs">Day</span>
+                        <span>Day</span>
                         <v-icon end>
                             mdi-hours-24
                         </v-icon>
                     </v-btn>
                     <v-btn value="last week measurements">
-                        <span class="hidden-xs">Week</span>
+                        <span>Week</span>
                         <v-icon end>
                             mdi-calendar-week
                         </v-icon>
                     </v-btn>
                     <v-btn value="last month measurements">
-                        <span class="hidden-xs">Month</span>
+                        <span>Month</span>
                         <v-icon end>
                             mdi-calendar-month
                         </v-icon>
@@ -66,6 +67,8 @@ function showLastMonthMeasurements() {
                 </v-btn-toggle>
             </v-col>
         </v-row>
+        <v-row></v-row>
+        </v-card>
         <div v-if="showSection === 'actual measurements'">
             <ActualMeasurements />
         </div>

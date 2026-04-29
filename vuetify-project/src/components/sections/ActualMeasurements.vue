@@ -18,6 +18,9 @@ async function getActualMeasurements() {
         const data = await response.json() as DataMeasureMents[];
         if (data !== null) {
             showLastMeasurements.value = true;
+            lastMeasurementTime.value = new Date(data[0].retrievedAt).toLocaleTimeString();
+            firstMeasurementTime.value = new Date(data[data.length - 1].retrievedAt).toLocaleTimeString();
+
             lastMeasurements.value = data.reverse();
             temperatures.value = data.map(m => m.insideTemperatureCelsius);
             humidities.value = data.map(m => m.humidityPercentage);
@@ -32,17 +35,10 @@ async function getActualMeasurements() {
             minScaleHumidity.value = graficalHumidityData.minScale;
             maxScaleHumidity.value = graficalHumidityData.maxScale;
 
-            console.log("Temperature Gradient: " + t_selectedGradient.value);
-            console.log("Temperature Scale: " + minScaleTemperature.value + " - " + maxScaleTemperature.value);
-            console.log("Humidity Gradient: " + h_selectedGradient.value);
-            console.log("Humidity Scale: " + minScaleHumidity.value + " - " + maxScaleHumidity.value);
-
             maxTemperature.value = Math.max(...data.map(m => m.insideTemperatureCelsius));
             minTemperature.value = Math.min(...data.map(m => m.insideTemperatureCelsius));
             maxHumidity.value = Math.max(...data.map(m => m.humidityPercentage));
             minHumidity.value = Math.min(...data.map(m => m.humidityPercentage));
-            lastMeasurementTime.value = new Date(data[0].retrievedAt).toLocaleTimeString();
-            firstMeasurementTime.value = new Date(data[data.length - 1].retrievedAt).toLocaleTimeString();
 
         } else {
             showLastMeasurements.value = false;
@@ -84,7 +80,7 @@ const minHumidity: Ref<number> = ref(2)
         <v-row>
             <v-col cols="12" class="text-center">
                 <br />
-                <span class="text-headline-small">Actual Data Measurements ({{ firstMeasurementTime }} - {{
+                <span class="text-headline-small">Actual Data ({{ firstMeasurementTime }} - {{
                     lastMeasurementTime }})</span>
             </v-col>
         </v-row>
