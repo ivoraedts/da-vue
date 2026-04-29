@@ -54,4 +54,24 @@ public class MeasurementsController : ControllerBase
 
         return Ok(result);
     }
+    
+    [Route("hourly")] // This makes the URL: api/measurements/hourly
+    [HttpGet]
+    public async Task<ActionResult<List<DataMeasureMents>>> GetLastHourlyDataAggregations()
+    {
+        var aggregations = await _dbContext.HourlyAggregations.OrderByDescending(data => data.AggregationId).Take(24).ToListAsync();
+        if (aggregations == null || aggregations.Count == 0)
+        {
+            return NotFound("No measurements found.");
+        }
+
+        var result = aggregations.Select(m => new DataMeasureMents
+        {
+            InsideTemperatureCelsius = m.InsideTemperatureCelsius,
+            HumidityPercentage = m.HumidityPercentage,
+            RetrievedAt = m.TimeStamp
+        }).Reverse().ToList();
+
+        return Ok(result);
+    }
 }
