@@ -4,7 +4,7 @@ import InitializeTracking from '@/components/InitializeTracking.vue'
 import ScheduleEditor from '@/components/sections/ScheduleEditor.vue'
 import DataExplorer from '@/components/sections/DataExplorer.vue'
 import type { TadoRetrievalScheduleModel } from '@/models/TadoRetrievalScheduleModel';
-import type { LatestMeasurement } from '@/models/LatestMeasurement';
+import type { DataMeasureMents } from '@/models/DataMeasureMents';
 import { getMaterialColorForTemperature } from '@/utils/TemperatureDisplay';
 
 const showSection: Ref<string, string> = ref("overview");
@@ -85,7 +85,7 @@ async function getLatestMeasurement() {
         console.log("Could not retrieve latest measurement");
     }
     else {
-        const data = await response.json() as LatestMeasurement;
+        const data = await response.json() as DataMeasureMents;
         if (data !== null) {
             showLatestMeasurement.value = true;
             latestMeasurement.value = data;
@@ -118,7 +118,7 @@ const currentScheduleColor = computed(() => {
 });
 
 const showLatestMeasurement: Ref<boolean> = ref(false);
-const latestMeasurement: Ref<LatestMeasurement | null> = ref(null);
+const latestMeasurement: Ref<DataMeasureMents | null> = ref(null);
 
 const latestMeasurementColor: Ref<string> = ref("grey");
 function setColorBasedOnTemperature(temp: number) {
