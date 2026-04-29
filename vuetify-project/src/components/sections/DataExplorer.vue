@@ -41,7 +41,7 @@ function showLastMonthMeasurements() {
             <v-col cols="12" class="text-center">
                 <v-btn-toggle v-model="showSection" divided rounded="xl" border>
                     <v-btn value="actual measurements">
-                        <span>Actual</span>
+                        <span>Now</span>
                         <v-icon end>
                             mdi-border-radius
                         </v-icon>

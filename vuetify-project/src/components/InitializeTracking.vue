@@ -95,7 +95,7 @@ async function addTrackingSchedule() {
             <v-row class="px-4 py-2" align="center">
                 <v-col cols="12" class="text-center">
                     <v-btn color="warning" @click="goBackToOverview" size="x-large">
-                        Cancel Tado Temperature Tracking Initialisation
+                        Cancel Initialization
                     </v-btn>
                 </v-col>
             </v-row>
@@ -109,7 +109,7 @@ async function addTrackingSchedule() {
                             <v-card title="Step One" flat>
                                 <v-row>
                                     <v-col cols="12" class="text-center">
-                                        <h2>Step One: Get Activation URL</h2>
+                                        <h2>Step One: <br class="hidden-md-and-up" />Get Activation URL</h2>
                                         <p>Click next to get the activation URL for your Tado account.</p>
                                     </v-col>
                                 </v-row>
@@ -120,7 +120,7 @@ async function addTrackingSchedule() {
                             <v-card title="Step Two" flat>
                                 <v-row>
                                     <v-col cols="12" class="text-center">
-                                        <h2>Step Two: Authorise Tado Account</h2>
+                                        <h2>Step Two: <br class="hidden-md-and-up" />Authorise Tado Account</h2>
                                         <p>To authorise your Tado account, click the link below and follow the
                                             instructions and
                                             click Next when done.</p>
@@ -134,12 +134,12 @@ async function addTrackingSchedule() {
                             <v-card title="Step Three" flat>
                                 <v-row>
                                     <v-col cols="12" class="text-center">
-                                        <h2>Step Three: Complete Initialisation</h2>
+                                        <h2>Step Three: <br class="hidden-md-and-up" />Complete Initialization</h2>
                                         <div v-if="!ActualDataIsVisible">
                                             <p>This should show some data to prove correctness and an interval to
                                                 specify for
                                                 tracking.</p>
-                                            <p>Click Finish to complete the initialisation process and start tracking
+                                            <p>Click Finish to complete the initialization process and start tracking
                                                 your Tado
                                                 temperatures.</p>
                                         </div>
@@ -151,7 +151,7 @@ async function addTrackingSchedule() {
                                                 Celsius.</li>
                                             <li>The Humidity is {{ ActualTadoData?.humidityPercentage }} %</li>
                                             <li>The (Tado) Home ID is {{ ActualTadoData?.homeId }}</li>
-                                            <p>Set the tracking interval and click Finish to complete the initialisation
+                                            <p>Set the tracking interval and click Finish to complete the initialization
                                                 process
                                                 and start tracking your Tado temperatures.</p>
                                             <v-slider v-model="slider" :max="max" :min="min" :step="1"

@@ -80,14 +80,15 @@ const minHumidity: Ref<number> = ref(2)
         <v-row>
             <v-col cols="12" class="text-center">
                 <br />
-                <span class="text-headline-small">Actual Data ({{ firstMeasurementTime }} - {{
-                    lastMeasurementTime }})</span>
+                <span class="text-headline-small">Actual Data
+                    <br class="hidden-md-and-up" />
+                    ({{ firstMeasurementTime }} - {{lastMeasurementTime }})</span>
             </v-col>
         </v-row>
         <v-row>
             <v-col cols="12" class="text-center">
                 <br />
-                <span class="text-title-medium">Actual Temperature Measurements ({{ minTemperature }}°C - {{
+                <span class="text-title-large">Temperature ({{ minTemperature }}°C - {{
                     maxTemperature
                     }}°C)</span>
             </v-col>
@@ -110,7 +111,7 @@ const minHumidity: Ref<number> = ref(2)
         <v-row>
             <v-col cols="12" class="text-center">
                 <br />
-                <span class="text-title-medium">Actual Humidity Measurements ({{ minHumidity }}% - {{ maxHumidity
+                <span class="text-title-large">Humidity ({{ minHumidity }}% - {{ maxHumidity
                     }}%)</span>
             </v-col>
         </v-row>
