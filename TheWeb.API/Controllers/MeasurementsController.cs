@@ -29,9 +29,6 @@ public class MeasurementsController : ControllerBase
 
         return Ok(new LatestMeasurement
         {
-            RetrievalId = latestMeasurement.RetrievalId,
-            HomeId = latestMeasurement.HomeId,
-            ZoneName = latestMeasurement.ZoneName,
             InsideTemperatureCelsius = latestMeasurement.InsideTemperatureCelsius,
             HumidityPercentage = latestMeasurement.HumidityPercentage,
             RetrievedAt = latestMeasurement.RetrievedAt

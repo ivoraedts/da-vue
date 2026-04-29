@@ -23,7 +23,7 @@ public class TadoTemperatureController : ControllerBase
 
     [Route("get-new-url")] // This makes the URL: api/tadotemperature/get-new-url
     [HttpGet]
-    public async Task<ActionResult<TheWeb.API.Models.TadoInitialization>> Get()
+    public async Task<ActionResult<TadoInitialization>> Get()
     {
 
         var deviceAuthorization = await _tadoService.GetDeviceCodeAuthentication(CancellationToken.None);
@@ -32,7 +32,7 @@ public class TadoTemperatureController : ControllerBase
             return NotFound();
         }
 
-        var newDeviceAuthorization = new TheWeb.API.Data.TadoDeviceAuthentication
+        var newDeviceAuthorization = new TadoDeviceAuthentication
         {
             Creation = DateTime.UtcNow,
             DeviceCode = $"{deviceAuthorization.DeviceCode}",
@@ -55,7 +55,7 @@ public class TadoTemperatureController : ControllerBase
 
     [Route("authenticate/{communicationId}")] // This makes the URL: api/tadotemperature/authenticate/{communicationId}
     [HttpGet]
-    public async Task<ActionResult<TheWeb.API.Models.ActualTadoData>> GetByCommunicationId(int communicationId)
+    public async Task<ActionResult<ActualTadoData>> GetByCommunicationId(int communicationId)
     {
         var storedDeviceAuthorization = await _dbContext.TadoDeviceAuthentications.FirstOrDefaultAsync(d => d.CommunicationId == communicationId);
         if (storedDeviceAuthorization == null)
@@ -231,9 +231,6 @@ public class TadoTemperatureController : ControllerBase
 
         var newRetrievedData = new TadoRetrievedData
         {
-            ScheduleId = newSchedule.ScheduleId,
-            HomeId = homeId,
-            ZoneName = $"{zoneName}",
             InsideTemperatureCelsius = insiteTemperature,
             HumidityPercentage = humidityPercentage,
             RetrievedAt = DateTime.UtcNow

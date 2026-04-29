@@ -78,7 +78,7 @@ public class DataRetrievalService : IDataRetrievalService
             var userInfo = await AuthenticateAndRetrieveUserInfo(schedule.TokenId, cancellationToken);
             var retrievedData = await RetrieveBasicData(userInfo);
 
-            await StoreRetrievedData(retrievedData, schedule.ScheduleId);
+            await StoreRetrievedData(retrievedData);
             await UpdateRetrievalSchedule(schedule);
 
             _logger.LogInformation($"Data retrieval completed successfully at: {DateTimeOffset.Now}");
@@ -262,13 +262,10 @@ public class DataRetrievalService : IDataRetrievalService
         return zones;
     }
 
-    private async Task StoreRetrievedData(SimpleTadoRetrievedData retrievedData, int scheduleId)
+    private async Task StoreRetrievedData(SimpleTadoRetrievedData retrievedData)
     {
         var newRetrievedData = new TadoRetrievedData
         {
-            ScheduleId = scheduleId,
-            HomeId = retrievedData.HomeId,
-            ZoneName = retrievedData.ZoneName,
             InsideTemperatureCelsius = retrievedData.InsideTemperatureCelsius,
             HumidityPercentage = retrievedData.HumidityPercentage,
             RetrievedAt = DateTime.UtcNow
