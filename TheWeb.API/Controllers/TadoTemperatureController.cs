@@ -27,24 +27,24 @@ public class TadoTemperatureController : ControllerBase
     {
 
         var deviceAuthorization = await _tadoService.GetDeviceCodeAuthentication(CancellationToken.None);
-        if (deviceAuthorization==null)
+        if (deviceAuthorization == null)
         {
             return NotFound();
         }
 
         var newDeviceAuthorization = new TheWeb.API.Data.TadoDeviceAuthentication
         {
-           Creation = DateTime.UtcNow,
-           DeviceCode = $"{deviceAuthorization.DeviceCode}",
-           ExpiresIn = (deviceAuthorization.ExpiresIn == null) ? (short) 0 : deviceAuthorization.ExpiresIn.Value,
-           Interval = (deviceAuthorization.Interval == null) ? (short) 0 : deviceAuthorization.Interval.Value,
-           UserCode = $"{deviceAuthorization.UserCode}",
-           VerificationUri = $"{deviceAuthorization.VerificationUri}",
-           VerificationUriComplete = $"{deviceAuthorization.VerificationUriComplete}",
+            Creation = DateTime.UtcNow,
+            DeviceCode = $"{deviceAuthorization.DeviceCode}",
+            ExpiresIn = (deviceAuthorization.ExpiresIn == null) ? (short)0 : deviceAuthorization.ExpiresIn.Value,
+            Interval = (deviceAuthorization.Interval == null) ? (short)0 : deviceAuthorization.Interval.Value,
+            UserCode = $"{deviceAuthorization.UserCode}",
+            VerificationUri = $"{deviceAuthorization.VerificationUri}",
+            VerificationUriComplete = $"{deviceAuthorization.VerificationUriComplete}",
         };
         _dbContext.TadoDeviceAuthentications.Add(newDeviceAuthorization);
         await _dbContext.SaveChangesAsync();
-        
+
         return Ok(new TadoInitialization
         {
             CommunicationId = newDeviceAuthorization.CommunicationId,
@@ -57,7 +57,7 @@ public class TadoTemperatureController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<TheWeb.API.Models.ActualTadoData>> GetByCommunicationId(int communicationId)
     {
-        var storedDeviceAuthorization = await _dbContext.TadoDeviceAuthentications.FirstOrDefaultAsync(d => d.CommunicationId==communicationId);
+        var storedDeviceAuthorization = await _dbContext.TadoDeviceAuthentications.FirstOrDefaultAsync(d => d.CommunicationId == communicationId);
         if (storedDeviceAuthorization == null)
         {
             return NotFound("Device authorization not found");
@@ -101,17 +101,17 @@ public class TadoTemperatureController : ControllerBase
             return NotFound("No homes found for the authenticated user.");
         }
 
-        var homeId = Convert.ToInt32(me.Homes.Single().Id??0);
+        var homeId = Convert.ToInt32(me.Homes.Single().Id ?? 0);
         var zones = await _tadoService.GetZones(homeId);
 
-        if(zones == null || zones.Length == 0)
+        if (zones == null || zones.Length == 0)
         {
             return NotFound("No zones found for the home.");
         }
 
         var zoneName = string.Empty;
-        var insiteTemperature = (double) 0;
-        var humidityPercentage = (double) 0;
+        var insiteTemperature = (double)0;
+        var humidityPercentage = (double)0;
 
         foreach (var zone in zones)
         {
@@ -173,17 +173,17 @@ public class TadoTemperatureController : ControllerBase
             return NotFound("No homes found for the authenticated user.");
         }
 
-        var homeId = Convert.ToInt32(me.Homes.Single().Id??0);
+        var homeId = Convert.ToInt32(me.Homes.Single().Id ?? 0);
         var zones = await _tadoService.GetZones(homeId);
 
-        if(zones == null || zones.Length == 0)
+        if (zones == null || zones.Length == 0)
         {
             return NotFound("No zones found for the home.");
         }
 
         var zoneName = string.Empty;
-        var insiteTemperature = (double) 0;
-        var humidityPercentage = (double) 0;
+        var insiteTemperature = (double)0;
+        var humidityPercentage = (double)0;
 
         foreach (var zone in zones)
         {
@@ -202,6 +202,15 @@ public class TadoTemperatureController : ControllerBase
             {
                 break; // Exit the loop if we have valid temperature and humidity values
             }
+        }
+
+        if (setSchedule.IntervalInMinutes < 1)
+        {
+            setSchedule.IntervalInMinutes = 1;
+        }
+        if (setSchedule.IntervalInMinutes > 120)
+        {
+            setSchedule.IntervalInMinutes = 120;
         }
 
         var newSchedule = new TadoRetrievalSchedule
@@ -238,7 +247,7 @@ public class TadoTemperatureController : ControllerBase
             ScheduleId = newSchedule.ScheduleId,
             HomeId = homeId,
             InsideTemperatureCelsius = insiteTemperature,
-            HumidityPercentage = humidityPercentage,            
+            HumidityPercentage = humidityPercentage,
             ZoneName = $"{zoneName}",
             TokenId = newSchedule.TokenId,
             Interval = newSchedule.Interval,
@@ -247,17 +256,55 @@ public class TadoTemperatureController : ControllerBase
         }); // Returns a 200 OK status with the JSON object
     }
 
-    [Route("getActiveSchedule")] // This makes the URL: api/tadotemperature/getActiveSchedule
+    [Route("getCurrentSchedule")] // This makes the URL: api/tadotemperature/getCurrentSchedule
     [HttpGet]
-    public async Task<ActionResult<TadoRetrievalScheduleModel>> GetActiveSchedule()
+    public async Task<ActionResult<TadoRetrievalScheduleModel>> GetCurrentSchedule()
     {
         var activeSchedule = await _dbContext.TadoRetrievalSchedules.OrderBy(s => s.ScheduleId).FirstOrDefaultAsync(s => s.IsActive);
-        if (activeSchedule == null)
+        if (activeSchedule != null)
         {
-            return NotFound("No active schedule found.");
+            return Ok(activeSchedule.ConvertToModel());
+
+        }
+        var mostRecentSchedule = await _dbContext.TadoRetrievalSchedules.OrderByDescending(s => s.ScheduleId).FirstOrDefaultAsync();
+        if (mostRecentSchedule != null)
+        {
+            return Ok(mostRecentSchedule.ConvertToModel());
         }
 
-        return Ok(activeSchedule.ConvertToModel());
+        return NotFound("No schedule found.");
+    }
+
+    [Route("editSchedule/{id}")]
+    [HttpPut]
+    public ActionResult<TadoRetrievalScheduleModel> EditSchedule(int id, [FromBody] TadoRetrievalScheduleModel updatedSchedule)
+    {
+        if (updatedSchedule == null)
+        {
+            return BadRequest("Schedule is required.");
+        }
+
+        var schedule = _dbContext.TadoRetrievalSchedules.SingleOrDefault(t => t.ScheduleId == id);
+        if (schedule == null)
+        {
+            return NotFound();
+        }
+
+        if (updatedSchedule.Interval < 1)
+        {
+            updatedSchedule.Interval = 1;
+        }
+        if (updatedSchedule.Interval > 120)
+        {
+            updatedSchedule.Interval = 120;
+        }
+
+        schedule.IsActive = updatedSchedule.IsActive;
+        schedule.Interval = updatedSchedule.Interval;
+
+        _dbContext.SaveChanges();
+
+        return Ok(schedule);
     }
 
 }

@@ -10,7 +10,7 @@ import { getMaterialColorForTemperature } from '@/utils/TemperatureDisplay';
 const showSection: Ref<string, string> = ref("overview");
 
 function showOverview() {
-    showSection.value = "overview";    
+    showSection.value = "overview";
     refreshDataIfNeeded();
 }
 
@@ -22,8 +22,13 @@ function refreshDataIfNeeded() {
     }
 }
 
-function showOverviewWithComment(name: string) {
-    console.log("Showing overview for " + name);
+function showOverviewWithComment(comment: string) {
+    if (comment == 'scheduleUpdated') {
+        console.log("Updating schedule on request of child component...");
+        getLatestMeasurement();
+        getActiveTrackingSchedule();
+    }
+    console.log("Showing overview for " + comment);
     showOverview();
 }
 
@@ -37,34 +42,33 @@ function showScheduleEditor() {
 
 
 async function getActiveTrackingSchedule() {
-    // Vite proxies '/api/tadotemperature/getActiveSchedule' to 'http://localhost:5160/api/tadotemperature/getActiveSchedule'
-    const response = await fetch('/api/tadotemperature/getActiveSchedule')
+    // Vite proxies '/api/tadotemperature/getCurrentSchedule' to 'http://localhost:5160/api/tadotemperature/getCurrentSchedule'
+    const response = await fetch('/api/tadotemperature/getCurrentSchedule')
 
     if (!response.ok) {
-
         if (response.status === 404) {
-            console.log("No active schedule found (404)");
-            activeSchedulesAreRetrieved.value = true;
-            activeScheduleExists.value = false;
+            console.log("No schedule found (404)");
+            schedulesAreRetrieved.value = true;
+            scheduleExists.value = false;
         } else {
             console.log("Error retrieving active schedule: " + response.statusText);
-            activeSchedulesAreRetrieved.value = false;
-        }        
+            schedulesAreRetrieved.value = false;
+        }
     }
     else {
         const data = await response.json() as TadoRetrievalScheduleModel;
         if (data !== null) {
-            console.log("Active Schedule: " + data.scheduleId);
-            activeScheduleExists.value = true;
-            activeSchedule.value = data;
-            activeSchedule.value.nextRetrievalTimeString = new Date(activeSchedule.value.nextRetrievalTime).toLocaleString();
-            activeSchedule.value.lastRetrievalTimeString = new Date(activeSchedule.value.lastRetrievalTime).toLocaleString();
+            scheduleExists.value = true;
+            currentSchedule.value = data;
+            currentSchedule.value.nextRetrievalTimeString = new Date(currentSchedule.value.nextRetrievalTime).toLocaleString();
+            currentSchedule.value.lastRetrievalTimeString = new Date(currentSchedule.value.lastRetrievalTime).toLocaleString();
+            scheduleIsActive.value = data.isActive;
         } else {
             //this should never happen!
             console.log("No active schedule");
-            activeScheduleExists.value = false;
+            scheduleExists.value = false;
         }
-        activeSchedulesAreRetrieved.value = true;
+        schedulesAreRetrieved.value = true;
     }
 }
 
@@ -91,13 +95,23 @@ async function getLatestMeasurement() {
     lastRefreshTime = new Date();
 }
 
-const activeSchedulesAreRetrieved: Ref<boolean> = ref(false);
-const activeScheduleExists: Ref<boolean> = ref(false);
+const schedulesAreRetrieved: Ref<boolean> = ref(false);
+const scheduleExists: Ref<boolean> = ref(false);
+const scheduleIsActive: Ref<boolean> = ref(false);
 
-const canInitializeTracking = computed(() => activeSchedulesAreRetrieved.value && !activeScheduleExists.value);
-const canEditActiveSchedule = computed(() => activeSchedulesAreRetrieved.value && activeScheduleExists.value);
+const canInitializeTracking = computed(() => schedulesAreRetrieved.value && !scheduleIsActive.value);
+const canEditCurrentSchedule = computed(() => schedulesAreRetrieved.value && scheduleExists.value);
 
-const activeSchedule: Ref<TadoRetrievalScheduleModel | null> = ref(null);
+const currentSchedule: Ref<TadoRetrievalScheduleModel | null> = ref(null);
+const currentScheduleColor = computed(() => {
+    if (!scheduleIsActive.value) {
+        return "grey";
+    } else if (currentSchedule.value?.consecutiveFailures && currentSchedule.value.consecutiveFailures > 0) {
+        return "orange-darken-3";
+    } else {
+        return "secondary";
+    }
+});
 
 const showLatestMeasurement: Ref<boolean> = ref(false);
 const latestMeasurement: Ref<LatestMeasurement | null> = ref(null);
@@ -105,7 +119,7 @@ const latestMeasurement: Ref<LatestMeasurement | null> = ref(null);
 const latestMeasurementColor: Ref<string> = ref("grey");
 function setColorBasedOnTemperature(temp: number) {
     if (latestMeasurement.value) {
-            latestMeasurementColor.value = getMaterialColorForTemperature(temp);       
+        latestMeasurementColor.value = getMaterialColorForTemperature(temp);
     }
 }
 
@@ -161,12 +175,13 @@ onMounted(() => {
             </v-row>
         </v-card>
 
-        <v-card variant="elevated" color="secondary" v-if="canEditActiveSchedule" class="mx-auto mt-5" max-width="500">
+        <v-card variant="elevated" :color="currentScheduleColor" v-if="canEditCurrentSchedule" class="mx-auto mt-5"
+            max-width="500">
             <v-row class="px-4 py-2" align="center">
                 <v-col cols="12" class="text-center">
                     <v-row class="px-4 py-2" align="center">
                         <v-col cols="6" class="text-right">
-                            <h2>Active Schedule</h2>
+                            <h2>Tracking Schedule</h2>
                         </v-col>
                         <v-col cols="6" class="text-left">
                             <v-btn icon @click="showScheduleEditor()">
@@ -175,20 +190,26 @@ onMounted(() => {
                         </v-col>
                     </v-row>
                 </v-col>
-                <v-col cols="6">
-                    <p>Schedule ID: {{ activeSchedule?.scheduleId }}</p>
-                    <p>Interval: {{ activeSchedule?.interval }} minutes</p>
-                    <p>Zone name: {{ activeSchedule?.zoneName }}</p>
-                    <p>Fail streak: {{ activeSchedule?.consecutiveFailures }}</p>
+                <v-col v-if="!scheduleIsActive" cols="6" class="text-right">
+                    <v-icon color="yellow">mdi-alert</v-icon>
+                </v-col>
+                <v-col v-if="!scheduleIsActive" cols="6" class="text-left">
+                    <h3>Deactivated</h3>
                 </v-col>
                 <v-col cols="6">
-                    <p>Next Retrieval:</p>
-                    <p>{{ activeSchedule?.nextRetrievalTimeString }}</p>
+                    <p>Interval: {{ currentSchedule?.interval }} minutes</p>
                     <p>Last Retrieval:</p>
-                    <p>{{ activeSchedule?.lastRetrievalTimeString }}</p>
+                    <p>{{ currentSchedule?.lastRetrievalTimeString }}</p>
                 </v-col>
-                <v-col v-if="activeSchedule?.lastError" cols="12" class="text-center">
-                    <p>Last Error: {{ activeSchedule?.lastError }}</p>
+                <v-col cols="6">
+                    <p>Zone name: {{ currentSchedule?.zoneName }}</p>
+                    <p>Next Retrieval:</p>
+                    <p>{{ currentSchedule?.nextRetrievalTimeString }}</p>
+                </v-col>
+                <v-col v-if="currentSchedule?.lastError" cols="12">
+                    <p v-if="currentSchedule != null && currentSchedule.consecutiveFailures > 0">Fail streak: {{
+                        currentSchedule?.consecutiveFailures }}</p>
+                    <p>Last Error: {{ currentSchedule?.lastError }}</p>
                 </v-col>
             </v-row>
         </v-card>
