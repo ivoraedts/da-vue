@@ -172,8 +172,7 @@ async function showDatePicker() {
                         Pick Date
                     </v-btn>                    
                 </v-col>
-                <v-col v-if="showSpecificDate" cols="2" class="text-center">
-                </v-col>
+                <v-col v-if="showSpecificDate" cols="2" class="hidden-sm-and-down"></v-col>
                 <v-col v-if="showSpecificDate" cols="10" class="text-center">
                     <v-date-picker v-model="date" :max="maxdate" :min="mindate" @update:model-value="getLastHourlyAggregationsForSpecifiedDate()"></v-date-picker>
                 </v-col>
