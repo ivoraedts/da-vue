@@ -59,6 +59,9 @@ public class RunScheduledRetrievals : BackgroundService
             //todo: I could optimise this by only running this after some data was retrieved
             var hourlyAggregationService = scope.ServiceProvider.GetRequiredService<IHourlyDataAggregationService>();
             await hourlyAggregationService.AggregateDataAsync(stoppingToken);
+
+            var dailyAggregationService = scope.ServiceProvider.GetRequiredService<IDailyDataAggregationService>();
+            await dailyAggregationService.AggregateDataAsync(stoppingToken);
             
             return nextRetrievalTime;
         }

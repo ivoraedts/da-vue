@@ -96,7 +96,7 @@ public class MeasurementsController : ControllerBase
         return Ok(result);
     }
     
-    [Route("hourly/{date}")] // This makes the URL: api/measurements/hourly
+    [Route("hourly/{date}")] // This makes the URL: api/measurements/hourly/{date}
     [HttpGet]
     public async Task<ActionResult<List<DataMeasureMents>>> GetLastHourlyDataAggregations(DateTime date)
     {
@@ -108,6 +108,109 @@ public class MeasurementsController : ControllerBase
         if (aggregations == null || aggregations.Count == 0)
         {
             return NotFound("No aggregation found.");
+        }
+
+        var result = aggregations.Select(m => new DataMeasureMents
+        {
+            InsideTemperatureCelsius = m.InsideTemperatureCelsius,
+            HumidityPercentage = m.HumidityPercentage,
+            RetrievedAt = m.TimeStamp
+        }).Reverse().ToList();
+
+        return Ok(result);
+    }
+
+    [Route("daily")] // This makes the URL: api/measurements/daily
+    [HttpGet]
+    public async Task<ActionResult<List<DataMeasureMents>>> GetLastDailyDataAggregations(int take = 7)
+    {
+        if (take <= 0)
+        {
+            return BadRequest("Parameter 'take' must be greater than zero.");
+        }
+
+        var aggregations = await _dbContext.DailyAggregations.OrderByDescending(data => data.AggregationId).Take(take).ToListAsync();
+        if (aggregations == null || aggregations.Count == 0)
+        {
+            return NotFound("No aggregation found.");
+        }
+
+        var result = aggregations.Select(m => new DataMeasureMents
+        {
+            InsideTemperatureCelsius = m.InsideTemperatureCelsius,
+            HumidityPercentage = m.HumidityPercentage,
+            RetrievedAt = m.TimeStamp
+        }).Reverse().ToList();
+
+        return Ok(result);
+    }
+
+    [Route("daily/boundaries")] // This makes the URL: api/measurements/daily/boundaries
+    [HttpGet]
+    public async Task<ActionResult<Boundaries>> GetLastDailyDataAggregationBoundaries()
+    {
+        var firstAggregation = await _dbContext.DailyAggregations.OrderBy(data => data.AggregationId).FirstOrDefaultAsync();
+        if (firstAggregation == null)
+        {
+            return NotFound("No aggregation found.");
+        }
+        var lastAggregation = await _dbContext.DailyAggregations.OrderByDescending(data => data.AggregationId).FirstAsync();
+
+        var result = new Boundaries
+        {
+            OldestItem = firstAggregation.TimeStamp,
+            NewestItem = lastAggregation.TimeStamp,
+        };
+
+        return Ok(result);
+    }
+
+    [Route("daily/{date}")] // This makes the URL: api/measurements/daily/{date}
+    [HttpGet]
+    public async Task<ActionResult<List<DataMeasureMents>>> GetDailyDataAggregations(DateTime date, int take = 7)
+    {
+        if (take <= 0)
+        {
+            return BadRequest("Parameter 'take' must be greater than zero.");
+        }
+
+        date = date.AddDays(1);
+        var aggregations = await _dbContext.DailyAggregations
+            .OrderByDescending(data => data.AggregationId)
+            .Where(data => data.TimeStamp < date)
+            .Take(take).ToListAsync();
+        if (aggregations == null || aggregations.Count == 0)
+        {
+            return NotFound("No aggregation found.");
+        }
+
+        var result = aggregations.Select(m => new DataMeasureMents
+        {
+            InsideTemperatureCelsius = m.InsideTemperatureCelsius,
+            HumidityPercentage = m.HumidityPercentage,
+            RetrievedAt = m.TimeStamp
+        }).Reverse().ToList();
+
+        return Ok(result);
+    }
+
+    [Route("daily/month/{year}/{month}")] // This makes the URL: api/measurements/daily/month/{year}/{month}
+    [HttpGet]
+    public async Task<ActionResult<List<DataMeasureMents>>> GetDailyDataAggregationsByMonth(int year, int month)
+    {
+        if (month < 1 || month > 12)
+        {
+            return BadRequest("Month must be between 1 and 12.");
+        }
+
+        var aggregations = await _dbContext.DailyAggregations
+            .OrderByDescending(data => data.AggregationId)
+            .Where(data => data.TimeStamp.Year == year && data.TimeStamp.Month == month)
+            .ToListAsync();
+
+        if (aggregations == null || aggregations.Count == 0)
+        {
+            return NotFound("No aggregation found for the requested month.");
         }
 
         var result = aggregations.Select(m => new DataMeasureMents

@@ -11,6 +11,7 @@ builder.Services.AddDaVueDbContext(builder.Configuration);
 builder.Services.AddControllers();
 builder.Services.AddTransient<IDataRetrievalService, DataRetrievalService>();
 builder.Services.AddTransient<IHourlyDataAggregationService, HourlyDataAggregationService>();
+builder.Services.AddTransient<IDailyDataAggregationService, DailyDataAggregationService>();
 builder.Services.AddHostedService<RunScheduledRetrievals>();
 
 var app = builder.Build();
