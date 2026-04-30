@@ -62,7 +62,52 @@ public class MeasurementsController : ControllerBase
         var aggregations = await _dbContext.HourlyAggregations.OrderByDescending(data => data.AggregationId).Take(24).ToListAsync();
         if (aggregations == null || aggregations.Count == 0)
         {
-            return NotFound("No measurements found.");
+            return NotFound("No aggregation found.");
+        }
+
+        var result = aggregations.Select(m => new DataMeasureMents
+        {
+            InsideTemperatureCelsius = m.InsideTemperatureCelsius,
+            HumidityPercentage = m.HumidityPercentage,
+            RetrievedAt = m.TimeStamp
+        }).Reverse().ToList();
+
+        return Ok(result);
+    }
+    
+    [Route("hourly/boundaries")] // This makes the URL: api/measurements/hourly/boundaries
+    [HttpGet]
+    public async Task<ActionResult<List<DataMeasureMents>>> GetLastHourlyDataAggregationBoundaries()
+    {
+        var firstAggregation = await _dbContext.HourlyAggregations.OrderBy(data => data.AggregationId).FirstOrDefaultAsync();
+        if (firstAggregation == null)
+        {
+            return NotFound("No aggregation found.");
+        }
+        var lastAggregation = await _dbContext.HourlyAggregations.OrderByDescending(data => data.AggregationId).FirstAsync();
+
+
+        var result = new Boundaries
+        {
+            OldestItem = firstAggregation.TimeStamp,
+            NewestItem = lastAggregation.TimeStamp,
+        };
+
+        return Ok(result);
+    }
+    
+    [Route("hourly/{date}")] // This makes the URL: api/measurements/hourly
+    [HttpGet]
+    public async Task<ActionResult<List<DataMeasureMents>>> GetLastHourlyDataAggregations(DateTime date)
+    {
+        date = date.AddDays(1);
+        var aggregations = await _dbContext.HourlyAggregations
+            .OrderByDescending(data => data.AggregationId)
+            .Where(data => data.TimeStamp < date)
+            .Take(24).ToListAsync();
+        if (aggregations == null || aggregations.Count == 0)
+        {
+            return NotFound("No aggregation found.");
         }
 
         var result = aggregations.Select(m => new DataMeasureMents

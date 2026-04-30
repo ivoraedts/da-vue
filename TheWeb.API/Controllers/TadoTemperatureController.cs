@@ -298,6 +298,10 @@ public class TadoTemperatureController : ControllerBase
 
         schedule.IsActive = updatedSchedule.IsActive;
         schedule.Interval = updatedSchedule.Interval;
+        if (schedule.LastRetrievalTime != default)
+        {
+            schedule.NextRetrievalTime = schedule.LastRetrievalTime.AddMinutes(updatedSchedule.Interval);
+        }
 
         _dbContext.SaveChanges();
 
