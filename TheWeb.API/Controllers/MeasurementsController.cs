@@ -194,6 +194,35 @@ public class MeasurementsController : ControllerBase
         return Ok(result);
     }
 
+        [Route("daily/month/{year}/{month}")] // This makes the URL: api/measurements/daily/month/{year}/{month}
+    [HttpGet]
+    public async Task<ActionResult<List<DataMeasureMents>>> GetDailyDataAggregationsByMonth(int year, int month)
+    {
+        if (month < 1 || month > 12)
+        {
+            return BadRequest("Month must be between 1 and 12.");
+        }
+
+        var aggregations = await _dbContext.DailyAggregations
+            .OrderByDescending(data => data.AggregationId)
+            .Where(data => data.TimeStamp.Year == year && data.TimeStamp.Month == month)
+            .ToListAsync();
+
+        if (aggregations == null || aggregations.Count == 0)
+        {
+            return NotFound("No aggregation found for the requested month.");
+        }
+
+        var result = aggregations.Select(m => new DataMeasureMents
+        {
+            InsideTemperatureCelsius = m.InsideTemperatureCelsius,
+            HumidityPercentage = m.HumidityPercentage,
+            RetrievedAt = m.TimeStamp
+        }).Reverse().ToList();
+
+        return Ok(result);
+    }
+
     [Route("daypart")] // This makes the URL: api/measurements/daypart
     [HttpGet]
     public async Task<ActionResult<List<DatePartMeasurements>>> GetLastDayPartDataAggregations(int take = 28)
@@ -249,7 +278,9 @@ public class MeasurementsController : ControllerBase
             return BadRequest("Parameter 'take' must be greater than zero.");
         }
 
+        //var localTime = TimeZoneInfo.ConvertTimeFromUtc(firstHourlyAggregationTime, _timeZone);
         date = date.AddDays(1);
+        date = TimeZoneInfo.ConvertTimeToUtc(date);
         var aggregations = await _dbContext.DayPartAggregations
             .OrderByDescending(data => data.AggregationId)
             .Where(data => data.TimeStamp < date)
