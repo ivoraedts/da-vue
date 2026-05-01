@@ -24,6 +24,7 @@ namespace TheWeb.API.Data
         public DbSet<TadoRetrievedData> TadoRetrievedData { get; set; }
         public DbSet<RetrievalAggregation> HourlyAggregations { get; set; }
         public DbSet<DailyRetrievalAggregation> DailyAggregations { get; set; }
+        public DbSet<DayPartRetrievalAggregation> DayPartAggregations { get; set; }
     }
 
     public static class ServiceCollectionExtensions

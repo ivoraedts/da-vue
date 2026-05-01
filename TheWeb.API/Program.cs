@@ -12,6 +12,7 @@ builder.Services.AddControllers();
 builder.Services.AddTransient<IDataRetrievalService, DataRetrievalService>();
 builder.Services.AddTransient<IHourlyDataAggregationService, HourlyDataAggregationService>();
 builder.Services.AddTransient<IDailyDataAggregationService, DailyDataAggregationService>();
+builder.Services.AddTransient<IDayPartDataAggregationService, DayPartDataAggregationService>();
 builder.Services.AddHostedService<RunScheduledRetrievals>();
 
 var app = builder.Build();

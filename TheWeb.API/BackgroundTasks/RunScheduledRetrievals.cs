@@ -62,6 +62,9 @@ public class RunScheduledRetrievals : BackgroundService
 
             var dailyAggregationService = scope.ServiceProvider.GetRequiredService<IDailyDataAggregationService>();
             await dailyAggregationService.AggregateDataAsync(stoppingToken);
+
+            var dayPartAggregationService = scope.ServiceProvider.GetRequiredService<IDayPartDataAggregationService>();
+            await dayPartAggregationService.AggregateDataAsync(stoppingToken);
             
             return nextRetrievalTime;
         }
