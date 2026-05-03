@@ -608,6 +608,12 @@ Then for Adminer, I just mapped the 8081 to 8080, so over that port I can access
 The web app itself is accesible of port 3000 and even the API is directly accesible over port 5160.
 Off course for security reasons, you could remove the port mappings for the API and postgresql.
 
+## Some clean starting point
+
+Up until now, this might be a good template to start with using Vue + TypeScript + Vuetify Material Styling, ASP.NET 10 API, Docker and a PostgresQL Database. So before adding more that is probably not interesting as a starting point, it made sense to create a branch, so that can be used (forked or whatever) as a nice starting point:
+
+[A branch named nice-clean-starting-point](https://github.com/ivoraedts/da-vue/tree/nice-clean-starting-point)
+
 ## Commenting the stuff in GitHub
 
 When making all this documentation, I sometimes peaked at this documentation of the [markdown stuff](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax).
