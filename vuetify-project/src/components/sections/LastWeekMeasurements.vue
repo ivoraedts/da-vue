@@ -41,6 +41,8 @@ const selectedDate: Ref<Date> = ref(new Date())
 const mindate: Ref<string> = ref('2026-04-24')
 const maxdate: Ref<string> = ref('2026-04-30')
 
+const showDetails: Ref<boolean> = ref(false)
+
 function getDateKey(dateString: string) {
   return new Date(dateString).toLocaleDateString(undefined, {
     month: 'short',
@@ -151,6 +153,10 @@ function showDatePicker() {
   showSpecificDate.value = true
 }
 
+function toggleDetails() {
+  showDetails.value = !showDetails.value
+}
+
 const t_selectedGradient: Ref<string[]> = ref([])
 const h_selectedGradient: Ref<string[]> = ref([])
 
@@ -242,29 +248,39 @@ onMounted(() => {
     </v-row>
 
     <v-row>
+      <v-col cols="12" class="text-center">
+        <v-btn variant="elevated" @click="toggleDetails()" prepend-icon="mdi-table" elevated
+          color="secondary">
+          {{ showDetails ? 'Hide Details' : 'Show Details' }}
+        </v-btn>
+      </v-col>
+    </v-row>
+
+    <v-row v-if="showDetails">
       <v-col cols="12">
-        <v-simple-table>
+        <v-simple-table class="mx-auto" style="max-width: 800px;">
           <thead>
             <tr>
-              <th class="text-left">Date</th>
-              <th class="text-left">Time</th>
-              <th class="text-left">Day Part</th>
-              <th class="text-right">Temp °C</th>
-              <th class="text-right">Humidity %</th>
+              <th class="text-left px-3">Date</th>
+              <th class="text-left px-3">Time</th>
+              <th class="text-left px-3">Day Part</th>
+              <th class="text-right px-3">Temp °C</th>
+              <th class="text-right px-3">Humidity %</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="item in measurements" :key="item.retrievedAt + item.dayPart">
-              <td>{{ new Date(item.retrievedAt).toLocaleDateString() }}</td>
-              <td>{{ new Date(item.retrievedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}</td>
-              <td>{{ item.dayPart }}</td>
-              <td class="text-right">{{ item.insideTemperatureCelsius.toFixed(1) }}</td>
-              <td class="text-right">{{ item.humidityPercentage.toFixed(1) }}</td>
+              <td class="px-3">{{ new Date(item.retrievedAt).toLocaleDateString() }}</td>
+              <td class="px-3">{{ new Date(item.retrievedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}</td>
+              <td class="px-3">{{ item.dayPart }}</td>
+              <td class="text-right px-3">{{ item.insideTemperatureCelsius.toFixed(1) }}</td>
+              <td class="text-right px-3">{{ item.humidityPercentage.toFixed(1) }}</td>
             </tr>
           </tbody>
         </v-simple-table>
       </v-col>
     </v-row>
+    <v-row v-if="!showDetails"></v-row>
   </div>
 </template>
 
