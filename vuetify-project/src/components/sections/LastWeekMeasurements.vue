@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, type Ref, onMounted } from 'vue'
+import { ref, type Ref, onMounted, computed, watch } from 'vue'
 import type { Boundaries } from '@/models/Boundaries';
 import { getGraficalHumidityData, getGraficalTemperatureData, type GraficalData } from '@/utils/TemperatureDisplay';
 
@@ -43,6 +43,16 @@ const maxdate: Ref<string> = ref('2026-04-30')
 
 const showDetails: Ref<boolean> = ref(false)
 
+const selectedDayPart: Ref<string> = ref('All')
+
+const filteredMeasurements = computed(() => {
+  if (selectedDayPart.value === 'All') {
+    return measurements.value
+  } else {
+    return measurements.value.filter(m => m.dayPart === selectedDayPart.value)
+  }
+})
+
 function getDateKey(dateString: string) {
   return new Date(dateString).toLocaleDateString(undefined, {
     month: 'short',
@@ -57,7 +67,6 @@ function sortMeasurements(data: DayPartMeasurements[]) {
 function updateGraphicData(data: DayPartMeasurements[]) {
   const sorted = sortMeasurements(data)
 
-  measurements.value = sorted
   temperatures.value = sorted.map(m => m.insideTemperatureCelsius)
   humidities.value = sorted.map(m => m.humidityPercentage)
   dayParts.value = sorted.map(m => m.dayPart)
@@ -94,7 +103,8 @@ async function getLastWeeklyDayPartAggregations() {
   const data = await response.json() as DayPartMeasurements[]
   if (data && data.length > 0) {
     showMeasurements.value = true
-    updateGraphicData(data)
+    measurements.value = data
+    updateGraphicData(measurements.value)
   }
   else {
     showMeasurements.value = false
@@ -137,7 +147,8 @@ async function getDayPartAggregationsForSpecifiedDate() {
   const data = await response.json() as DayPartMeasurements[]
   if (data && data.length > 0) {
     showMeasurements.value = true
-    updateGraphicData(data)
+    measurements.value = data
+    updateGraphicData(measurements.value)
   }
   else {
     showMeasurements.value = false
@@ -164,6 +175,10 @@ onMounted(() => {
   getLastWeeklyDayPartAggregations()
   getDayPartAggregationBoundaries()
 })
+
+watch(selectedDayPart, () => {
+  updateGraphicData(filteredMeasurements.value)
+})
 </script>
 
 <template>
@@ -178,8 +193,8 @@ onMounted(() => {
           </v-btn>
         </v-col>
         <v-col cols="6" class="text-center">
-          <v-btn variant="elevated" @click="showDatePicker()" prepend-icon="mdi-calendar" elevated
-            color="secondary" :disabled="showSpecificDate">
+          <v-btn variant="elevated" @click="showDatePicker()" prepend-icon="mdi-calendar" elevated color="secondary"
+            :disabled="showSpecificDate">
             Pick Date
           </v-btn>
         </v-col>
@@ -187,6 +202,25 @@ onMounted(() => {
         <v-col v-if="showSpecificDate" cols="10" class="text-center">
           <v-date-picker v-model="selectedDate" :max="maxdate" :min="mindate" type="date"
             @update:model-value="getDayPartAggregationsForSpecifiedDate()"></v-date-picker>
+        </v-col>
+        <v-col cols="12" class="text-center">
+          <v-btn-toggle v-model="selectedDayPart" divided rounded="xl" border>
+            <v-btn value="All">
+              <span>All</span>
+            </v-btn>
+            <v-btn value="Morning">
+              <span>Mor</span>
+            </v-btn>
+            <v-btn value="Afternoon">
+              <span>Aft</span>
+            </v-btn>
+            <v-btn value="Evening">
+              <span>Eve</span>
+            </v-btn>
+            <v-btn value="Night">
+              <span>Nig</span>
+            </v-btn>
+          </v-btn-toggle>
         </v-col>
       </v-row>
       <v-row></v-row>
@@ -216,8 +250,8 @@ onMounted(() => {
         <div>{{ minScaleTemperature }}°</div>
       </div>
       <div class="flex-grow-1">
-        <v-sparkline :fill="fill" :gradient="t_selectedGradient" :line-width="lineWidth"
-          :model-value="temperatures" :padding="padding" :smooth="smooth" auto-draw :min="minScaleTemperature"
+        <v-sparkline :fill="fill" :gradient="t_selectedGradient" :line-width="lineWidth" :model-value="temperatures"
+          :padding="padding" :smooth="smooth" auto-draw :min="minScaleTemperature"
           :max="maxScaleTemperature"></v-sparkline>
       </div>
     </div>
@@ -235,9 +269,8 @@ onMounted(() => {
         <div>{{ minScaleHumidity }}%</div>
       </div>
       <div class="flex-grow-1">
-        <v-sparkline :fill="fill" :gradient="h_selectedGradient" :line-width="lineWidth"
-          :model-value="humidities" :padding="padding" :smooth="smooth" auto-draw :min="minScaleHumidity"
-          :max="maxScaleHumidity"></v-sparkline>
+        <v-sparkline :fill="fill" :gradient="h_selectedGradient" :line-width="lineWidth" :model-value="humidities"
+          :padding="padding" :smooth="smooth" auto-draw :min="minScaleHumidity" :max="maxScaleHumidity"></v-sparkline>
       </div>
     </div>
 
@@ -249,8 +282,7 @@ onMounted(() => {
 
     <v-row>
       <v-col cols="12" class="text-center">
-        <v-btn variant="elevated" @click="toggleDetails()" prepend-icon="mdi-table" elevated
-          color="secondary">
+        <v-btn variant="elevated" @click="toggleDetails()" prepend-icon="mdi-table" elevated color="secondary">
           {{ showDetails ? 'Hide Details' : 'Show Details' }}
         </v-btn>
       </v-col>
@@ -269,9 +301,11 @@ onMounted(() => {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="item in measurements" :key="item.retrievedAt + item.dayPart">
+            <tr v-for="item in filteredMeasurements" :key="item.retrievedAt + item.dayPart">
               <td class="px-3">{{ new Date(item.retrievedAt).toLocaleDateString() }}</td>
-              <td class="px-3">{{ new Date(item.retrievedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}</td>
+              <td class="px-3">{{ new Date(item.retrievedAt).toLocaleTimeString([], {
+                hour: '2-digit', minute: '2-digit'
+              }) }}</td>
               <td class="px-3">{{ item.dayPart }}</td>
               <td class="text-right px-3">{{ item.insideTemperatureCelsius.toFixed(1) }}</td>
               <td class="text-right px-3">{{ item.humidityPercentage.toFixed(1) }}</td>
