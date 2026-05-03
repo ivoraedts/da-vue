@@ -623,6 +623,12 @@ It took me a while to understand on how to best use that library. Setting up the
 I made stuff via both Rider and VS Code. And at some point when I finished showing hourly data for a given day, I used AI functionality to help doing the same stuff but then for weekly and monthly data. Rider was bitching about linking a credit card before enabling the AI-agent chat, so I decided to stick with VS Code for that part. Some work was done by the Raptor mini AI and some work was done by Grok Code fast. I cannot really tell/remember which one worked better. They both did OK and both made some mistakes as well.
 
 I also did some work for making it look good on my tiny iPhone 13 mini. And it looks fine. Maybe I would need to do some more work to make it look better on a regular computer monitor, but that's maybe for another time.
+<p align="center" width="100%">
+    <img width="40%" src="images/ScreenshotOverview.jpeg">
+</p>
+<p align="center" width="100%">
+    <img width="40%" src="images/ScreenshotWeekly.jpeg">
+</p>
 
 ## Commenting the stuff in GitHub
 
