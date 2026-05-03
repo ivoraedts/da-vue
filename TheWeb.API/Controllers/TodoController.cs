@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using TheWeb.API.Data;
 
-namespace TheWebApi.Controllers;
+namespace TheWeb.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

@@ -18,6 +18,13 @@ namespace TheWeb.API.Data
         }
 
         public DbSet<TodoItem> TodoItems { get; set; }
+        public DbSet<TadoDeviceAuthentication> TadoDeviceAuthentications {get; set;}
+        public DbSet<TadoToken> TadoTokens { get; set; }
+        public DbSet<TadoRetrievalSchedule> TadoRetrievalSchedules { get; set; }
+        public DbSet<TadoRetrievedData> TadoRetrievedData { get; set; }
+        public DbSet<RetrievalAggregation> HourlyAggregations { get; set; }
+        public DbSet<DailyRetrievalAggregation> DailyAggregations { get; set; }
+        public DbSet<DayPartRetrievalAggregation> DayPartAggregations { get; set; }
     }
 
     public static class ServiceCollectionExtensions

@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using TheWebApi.Models;
+using TheWeb.API.Models;
 
-namespace TheWebApi.Controllers;
+namespace TheWeb.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")] // This makes the URL: api/displaylink
@@ -83,6 +83,22 @@ public class DisplayLinkController : ControllerBase
                 Icon = "mdi-youtube",
                 Href = "https://www.youtube.com/watch?v=HIIWdxEk_ls",
                 Color = "red-darken-3"
+            },
+            new DisplayLink
+            {
+                Title = "Opensource TADO API",
+                Subtitle = "Opensource Tado Api available on NuGet",
+                Icon = "mdi-github",
+                Href = "https://github.com/KoenZomers/TadoApi",
+                Color = "grey-darken-4"
+            },
+            new DisplayLink
+            {
+                Title = "Tado Article",
+                Subtitle = "Some article explaining the communication",
+                Icon = "mdi-home-thermometer-outline",
+                Href = "https://help.tado.com/en/articles/8565472-how-do-i-authenticate-to-access-the-rest-api",
+                Color = "blue-accent-4"
             },
         };
 

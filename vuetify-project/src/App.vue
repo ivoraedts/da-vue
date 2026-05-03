@@ -2,13 +2,13 @@
   import About from '@/components/About.vue'
   import Links from '@/components/Links.vue'
   import Todo from '@/components/Todo.vue'
+  import Home from '@/components/Home.vue'
   import { ref, type Ref  } from 'vue'
 
   const showPage: Ref<string, string> = ref("home");
-  showPage.value = "hello world page";
 
   function showAboutPage() {
-    showPage.value = "hello world page";
+    showPage.value = "about page";
   }
 
   function showHomePage() {
@@ -33,7 +33,7 @@
         </template>
         <v-app-bar-title>Da Vue</v-app-bar-title>
         <v-btn append-icon="mdi-information-outline" color="green-darken-4" @click="showAboutPage()">
-          Hello
+          About
         </v-btn>
         <v-btn append-icon="mdi-list-box" color="blue-darken-2" @click="showLinksPage()">
           Links
@@ -43,11 +43,11 @@
         </v-btn>
       </v-app-bar>
 
-      <div v-if="showPage==='hello world page'" >
+      <div v-if="showPage==='about page'" >
         <About />  
       </div>
       <div v-else-if="showPage==='home'">
-        <h1>Home Page</h1>
+        <Home />
       </div>
       <div v-else-if="showPage==='links page'">
         <Links />

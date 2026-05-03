@@ -1,11 +1,19 @@
 using Microsoft.EntityFrameworkCore;
 using TheWeb.API.Data;
+using TheWeb.API.Services;
+using TheWeb.API.BackgroundTasks;
+using KoenZomers.Tado.Api.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddTadoServices();
 builder.Services.AddDaVueDbContext(builder.Configuration);
-// Add services for Controllers
-builder.Services.AddControllers(); 
+builder.Services.AddControllers();
+builder.Services.AddTransient<IDataRetrievalService, DataRetrievalService>();
+builder.Services.AddTransient<IHourlyDataAggregationService, HourlyDataAggregationService>();
+builder.Services.AddTransient<IDailyDataAggregationService, DailyDataAggregationService>();
+builder.Services.AddTransient<IDayPartDataAggregationService, DayPartDataAggregationService>();
+builder.Services.AddHostedService<RunScheduledRetrievals>();
 
 var app = builder.Build();
 
@@ -15,7 +23,6 @@ using (var scope = app.Services.CreateScope())
     dbContext.Database.Migrate();
 }
 
-// Enable routing for Controllers
 app.MapControllers(); 
 
 app.Run();

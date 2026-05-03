@@ -15,7 +15,6 @@ publish/
 *.pubxml
 
 ## Secrets and Environment-specific
-appsettings.Development.json
 secrets.json
 .env
 
