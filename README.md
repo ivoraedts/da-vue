@@ -614,6 +614,16 @@ Up until now, this might be a good template to start with using Vue + TypeScript
 
 [A branch named nice-clean-starting-point](https://github.com/ivoraedts/da-vue/tree/nice-clean-starting-point)
 
+## Temperature and Humidity tracking via Tado
+
+I was thinking about what to do next. Maybe connect to some data that I can read from my home equipment. I considered the 'Slimme meter'. But reading the smart reader (for actual gas usage, power usage and power feedback) required some extra hardware and effort. So I came up with reading the actual temperature and humidity as I have a 'slimme thermostaat' (smart thermostat) from TADO. This is one of the market leaders in the Netherlands. After some searching, I did find a .net-library that is capable of reading those values. [It is open source via Github](https://github.com/KoenZomers/TadoApi) and available on NuGet, so it was worth trying it.
+
+It took me a while to understand on how to best use that library. Setting up the connection is already a bit tricky as you need more than just a login and a password. For setting up a new connection, I could build in some wizard using a [Stepper component](https://vuetifyjs.com/en/components/steppers/#usage). And I also needed some running before I knew which errors to catch. So first step was setting up a connection using both the WEB.API and the Front-end project. Once that is done, it was time to create some back-end task for retrieving the data. And then subsequently some more back-end task for making interesting aggregations. Than for displaying the data on the front-end I decided to use the [Sparklines component](https://vuetifyjs.com/en/components/sparklines/#usage). And I have done my best to find a beautiful, consistent, and fitting color scheme for it.
+
+I made stuff via both Rider and VS Code. And at some point when I finished showing hourly data for a given day, I used AI functionality to help doing the same stuff but then for weekly and monthly data. Rider was bitching about linking a credit card before enabling the AI-agent chat, so I decided to stick with VS Code for that part. Some work was done by the Raptor mini AI and some work was done by Grok Code fast. I cannot really tell/remember which one worked better. They both did OK and both made some mistakes as well.
+
+I also did some work for making it look good on my tiny iPhone 13 mini. And it looks fine. Maybe I would need to do some more work to make it look better on a regular computer monitor, but that's maybe for another time.
+
 ## Commenting the stuff in GitHub
 
 When making all this documentation, I sometimes peaked at this documentation of the [markdown stuff](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax).
