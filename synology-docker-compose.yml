@@ -3,7 +3,7 @@ services:
     image: ivoraedts/da-vue-theweb-api:latest
     ports:
       # <Host Port>:<Container Port>
-      - "5160:8080"
+      - "5161:8080" # Changed host port from 5160 to 5161
     depends_on:
       postgres: 
         condition: service_healthy
@@ -18,7 +18,7 @@ services:
     image: ivoraedts/da-vue-theweb-ui:latest
     ports:
     # <Host Port>:<Container Port>
-      - "3000:80"
+      - "3002:80" # Changed host port from 3000 to 3002
     depends_on:
       - theweb-api
     networks:
