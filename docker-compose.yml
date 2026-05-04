@@ -4,14 +4,16 @@ services:
       context: ./TheWeb.API
       dockerfile: Dockerfile
     ports:
-      - "5160:8080"
+      - "5160:8443"  # HTTPS
     depends_on:
       postgres: 
         condition: service_healthy
         restart: true
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8443
+    volumes:
+      - ./certs:/app/certs:ro
     networks:
       - docker-da-vue
 
@@ -20,9 +22,11 @@ services:
       context: ./vuetify-project
       dockerfile: Dockerfile
     ports:
-      - "3000:80"
+      - "3000:443"  # Changed from 3000:80 to 3000:443
     depends_on:
       - theweb-api
+    volumes:
+      - ./certs:/app/certs:ro  # Mount certificates
     networks:
       - docker-da-vue
 

@@ -2,6 +2,7 @@
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-preview AS base
 WORKDIR /app
 EXPOSE 8080
+EXPOSE 8443
 
 # Stage 2: Build - SDK for compiling
 FROM mcr.microsoft.com/dotnet/sdk:10.0-preview AS build
@@ -21,4 +22,5 @@ RUN dotnet publish "TheWeb.API.csproj" -c Release -o /app/publish /p:UseAppHost=
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
 ENTRYPOINT ["dotnet", "TheWeb.API.dll"]

@@ -13,9 +13,6 @@ export default defineConfig({
     // https://github.com/vuetifyjs/vuetify-loader/tree/master/packages/vite-plugin#readme
     Vuetify({
       autoImport: true,
-      styles: {
-        configFile: 'src/styles/settings.scss',
-      },
     }),
     Fonts({
       fontsource: {
@@ -48,10 +45,14 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'http://localhost:5160', // .NET app URL
+        target: process.env.VITE_API_URL || 'https://localhost:5160', // .NET app URL
         changeOrigin: true,            // Recommended for local proxying
         secure: false
-      }
+      },
+    },
+    https: {
+      key: './certs/localhost-key.pem',
+      cert: './certs/localhost.pem',
     }
   },
 })

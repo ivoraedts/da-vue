@@ -6,6 +6,11 @@ using KoenZomers.Tado.Api.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.WebHost.ConfigureKestrel((context, options) =>
+{
+    options.Configure(context.Configuration.GetSection("Kestrel"));
+});
+
 builder.Services.AddTadoServices();
 builder.Services.AddDaVueDbContext(builder.Configuration);
 builder.Services.AddControllers();
@@ -23,6 +28,7 @@ using (var scope = app.Services.CreateScope())
     dbContext.Database.Migrate();
 }
 
+app.UseHttpsRedirection();
 app.MapControllers(); 
 
 app.Run();

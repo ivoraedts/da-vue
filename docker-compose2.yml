@@ -1,9 +1,10 @@
 services:
   theweb-api:
-    image: ivoraedts/da-vue-theweb-api:latest
+    build:
+      context: ./TheWeb.API
+      dockerfile: Dockerfile
     ports:
-      # <Host Port>:<Container Port>
-      - "5160:8443" #HTTPS
+      - "5160:8443"  # HTTPS
     depends_on:
       postgres: 
         condition: service_healthy
@@ -11,18 +12,6 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_HTTPS_PORTS=8443
-    volumes:
-      - ./certs:/app/certs:ro
-    networks:
-      - docker-da-vue
-
-  theweb-ui:
-    image: ivoraedts/da-vue-theweb-ui:latest
-    ports:
-    # <Host Port>:<Container Port>
-      - "3000:443"
-    depends_on:
-      - theweb-api
     volumes:
       - ./certs:/app/certs:ro
     networks:
@@ -49,16 +38,21 @@ services:
       POSTGRES_PASSWORD: strong-password
     ports:
       # <Host Port>:<Container Port>
-      - "5433:5432"
+      - "5433:5432"     
 
-  adminer:
-    image: adminer:latest
-    container_name: docker-da-vue.adminer    
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: docker-da-vue.pgadmin
+    volumes:
+      - ./docker/pgadmin:/var/lib/pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: user-name@domain-name.com
+      PGADMIN_DEFAULT_PASSWORD: strong-password
     networks:
       - docker-da-vue
     ports:
       # <Host Port>:<Container Port>
-      - "8081:8080"
+      - "5051:80"
 
 networks:
   docker-da-vue:

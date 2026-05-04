@@ -1,0 +1,15 @@
+services:
+  theweb-ui:
+    build:
+      context: ./vuetify-project
+      dockerfile: Dockerfile
+    ports:
+      - "3000:443"  # Changed from 3000:80 to 3000:443
+    volumes:
+      - ./certs:/app/certs:ro  # Mount certificates
+    networks:
+      - docker-da-vue
+
+networks:
+  docker-da-vue:
+    driver: bridge
