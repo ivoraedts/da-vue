@@ -630,6 +630,78 @@ I also did some work for making it look good on my tiny iPhone 13 mini. And it l
     <img width="40%" src="images/ScreenshotWeekly.jpeg">
 </p>
 
+# Local HTTPS Development Setup (Synology & Docker)
+
+This guide documents the configuration for running a **Vue (Vite)** frontend and **.NET 10 API** over HTTPS using a Synology NAS as the SSL-terminating Reverse Proxy.
+
+## Prerequisites & Infrastructure
+*   **DDNS:** `YOURNAME.synology.me` configured via Synology External Access.
+*   **SSL Certificate:** Let's Encrypt certificate active for the DDNS hostname.
+*   **Router Port Forwarding:** 
+    *   Forward **TCP 3000** -> Synology NAS
+    *   Forward **TCP 5160** -> Synology NAS
+
+## Docker Compose Configuration
+To prevent port conflicts (since the Synology Reverse Proxy "claims" the public ports 3000 and 5160), the Docker **Host Ports** are offset by +1 (and 2 as 3001 was taken).
+
+```yaml
+services:
+  theweb-api:
+    image: ivoraedts/da-vue-theweb-api:latest
+    ports:
+      - "5161:8080"  # Source 5160 Proxy -> Host 5161 -> Container 8080
+    environment:
+      - ASPNETCORE_HTTP_PORTS=8080
+
+  theweb-ui:
+    image: ivoraedts/da-vue-theweb-ui:latest
+    ports:
+      - "3002:80"    # Source 3000 Proxy -> Host 3002 -> Container 80
+```
+
+## Synology Reverse Proxy Rules
+Set up in `Control Panel > Login Portal > Advanced > Reverse Proxy`.
+
+
+| Service | Source (Public HTTPS) | Destination (Internal HTTP) |
+| :--- | :--- | :--- |
+| **Vue Frontend** | `YOURNAME.synology.me:3000` | `localhost:3002` |
+| **.NET API** | `YOURNAME.synology.me:5160` | `localhost:5161` |
+
+### Critical Proxy Settings:
+*   **WebSockets:** Under `Custom Header > Create > WebSocket`, ensure headers are added for both rules (required for Vite HMR).
+*   **SSL Assignment:** In `Security > Certificate > Settings`, ensure the Let's Encrypt cert is assigned to these proxy entries.
+
+## Some optional things
+
+And then some steps that I didn't even need. (but maybe usefull for another time)
+
+### Backend Implementation (.NET 10)
+Update `Program.cs` to handle the proxy-forwarded HTTPS signals and CORS.
+
+```csharp
+// Trust Proxy Headers
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
+
+// CORS Configuration
+builder.Services.AddCors(options => {
+    options.AddPolicy("SynologyPolicy", policy => {
+        policy.WithOrigins("https://synology.me")
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();
+    });
+});
+app.UseCors("SynologyPolicy");
+```
+
+### Frontend Implementation (Vue/Vite)
+*   **Vite Config:** Ensure `server.https` is `false` (Synology offloads the SSL).
+*   **Environment:** Set `VITE_API_URL=https://synology.me`.
+
 ## Commenting the stuff in GitHub
 
 When making all this documentation, I sometimes peaked at this documentation of the [markdown stuff](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax).
