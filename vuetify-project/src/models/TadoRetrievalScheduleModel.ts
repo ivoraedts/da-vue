@@ -11,4 +11,7 @@ export interface TadoRetrievalScheduleModel {
     zoneName: string
     lastError: string
     consecutiveFailures: number
+    isPasswordProtected: boolean
+    oldPassword: string
+    newPassword: string
 }

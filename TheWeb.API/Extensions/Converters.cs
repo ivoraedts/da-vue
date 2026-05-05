@@ -32,7 +32,9 @@ namespace TheWeb.API.Extensions
                 HomeId = schedule.HomeId,
                 ZoneName = schedule.ZoneName,
                 LastError = schedule.LastError,
-                ConsecutiveFailures = schedule.ConsecutiveFailures
+                ConsecutiveFailures = schedule.ConsecutiveFailures,
+                IsPasswordProtected = !string.IsNullOrEmpty(schedule.Password),
+                OldPassword = null //this property is only there for the other direction
             };
         }
 

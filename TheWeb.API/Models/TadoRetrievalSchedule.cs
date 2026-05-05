@@ -12,5 +12,8 @@ namespace TheWeb.API.Models
     public required string ZoneName { get; set; }
     public required string LastError { get; set; }
     public int ConsecutiveFailures { get; set; }
+    public bool IsPasswordProtected { get; set; }
+    public string? OldPassword { get; set; }
+    public string? NewPassword { get; set; }
     }
 }

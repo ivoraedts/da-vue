@@ -287,6 +287,12 @@ public class TadoTemperatureController : ControllerBase
             return NotFound();
         }
 
+        if (!string.IsNullOrEmpty(schedule.Password) && schedule.IsActive)
+        {
+            if (updatedSchedule.OldPassword != schedule.Password)
+                return Unauthorized("Passwords do not match.");
+        }
+
         if (updatedSchedule.Interval < 1)
         {
             updatedSchedule.Interval = 1;
@@ -301,6 +307,15 @@ public class TadoTemperatureController : ControllerBase
         if (schedule.LastRetrievalTime != default)
         {
             schedule.NextRetrievalTime = schedule.LastRetrievalTime.AddMinutes(updatedSchedule.Interval);
+        }
+
+        if (!updatedSchedule.IsPasswordProtected || string.IsNullOrEmpty(updatedSchedule.NewPassword))
+        {
+            schedule.Password = null;
+        }
+        else
+        {
+            schedule.Password = updatedSchedule.NewPassword;
         }
 
         _dbContext.SaveChanges();
