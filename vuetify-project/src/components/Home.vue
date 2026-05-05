@@ -166,19 +166,37 @@ onMounted(() => {
             <v-row class="px-4 py-2" align="center">
                 <v-col cols="12" class="text-center">
                     <span class="text-headline-small">Latest Measurement</span>
-
                 </v-col>
-                <v-col cols="5" class="d-flex align-center justify-center">
+                <v-col cols="12" class="text-center">
+                    <v-img height="350" src="@/assets/tado-small.png" class="dont-print-on-front" />
+                </v-col>
+            </v-row>
+            <v-row class="huge-negative-margin">
+            </v-row>
+            <v-row>
+                <v-col cols="4" class="text-right">
                     <v-icon size="x-large" icon="mdi-thermometer"></v-icon>
+                </v-col>
+                <v-col cols="4" class="d-flex align-center justify-center">
                     <span class="text-display-small">{{ latestMeasurement?.insideTemperatureCelsius }}</span>
+                </v-col>
+                <v-col cols="4" class="text-left">
                     <v-icon size="x-large" icon="mdi-temperature-celsius"></v-icon>
                 </v-col>
-                <v-col cols="5" class="d-flex align-center justify-center">
+            </v-row>
+            <v-row>
+                <v-col cols="4" class="text-right">
                     <v-icon size="x-large" icon="mdi-water"></v-icon>
+                </v-col>
+                <v-col cols="4" class="d-flex align-center justify-center">
                     <span class="text-display-small">{{ latestMeasurement?.humidityPercentage }}</span>
+                </v-col>
+                <v-col cols="4" class="text-left">
                     <v-icon size="x-large" icon="mdi-percent"></v-icon>
                 </v-col>
-                <v-col cols="2" class="text-left">
+            </v-row>
+            <v-row>
+                <v-col cols="12" class="text-center">
                     <v-btn icon @click="showDataExplorer()">
                         <v-icon>mdi-chart-line</v-icon>
                     </v-btn>
@@ -244,14 +262,23 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.negative-margin {    
+.negative-margin {
     --v-col-gap-y: -35px;
 }
-.reduce-margin {    
+
+.reduce-margin {
     --v-col-gap-y: 1px;
 }
-.negative-bottom-margin
-{
+
+.negative-bottom-margin {
     margin-bottom: -15px;
+}
+
+.huge-negative-margin {
+    --v-col-gap-y: -250px;
+}
+
+.dont-print-on-front {
+    z-index: -1;
 }
 </style>
