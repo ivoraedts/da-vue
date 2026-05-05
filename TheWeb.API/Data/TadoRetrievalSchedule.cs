@@ -14,4 +14,5 @@ public class TadoRetrievalSchedule
     public required string ZoneName { get; set; }
     public required string LastError { get; set; }
     public required int ConsecutiveFailures { get; set; }
+    public string? Password { get; set; }
 }

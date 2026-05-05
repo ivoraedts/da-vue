@@ -38,6 +38,22 @@ public class DisplayLinkController : ControllerBase
             },
             new DisplayLink
             {
+                Title = "Icons",
+                Subtitle = "Material Design Icons",
+                Icon = "mdi-material-design",
+                Href = "https://pictogrammers.com/library/mdi/",
+                Color = "cyan-darken-2"
+            },
+            new DisplayLink
+            {
+                Title = "Colors",
+                Subtitle = "Material Color Palette (Vuetify)",
+                Icon = "mdi-palette",
+                Href = "https://vuetifyjs.com/en/styles/colors/#material-colors",
+                Color = "orange-darken-3"
+            },
+            new DisplayLink
+            {
                 Title = "Playground",
                 Subtitle = "Experiment with Vuetify in our online playground.",
                 Icon = "mdi-code-tags",
