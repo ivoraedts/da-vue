@@ -138,8 +138,13 @@ onMounted(() => {
 
 <template>
     <v-container v-if="showSection === 'overview'">
-        <v-card variant="elevated" color="primary" class="mx-auto mt-5" max-width="500">
+        <v-card variant="elevated" color="primary" class="mx-auto" max-width="500">
             <v-row>
+                <v-col cols="12" class="text-center">
+                    <v-img height="150" src="@/assets/LogoIncludingTado-small.png" />
+                </v-col>
+            </v-row>
+            <v-row class="negative-margin negative-bottom-margin">
                 <v-col cols="12" class="text-center">
                     <h1>Da Home Page</h1>
                 </v-col>
@@ -237,3 +242,16 @@ onMounted(() => {
         <ScheduleEditor @response="(msg) => showOverviewWithComment(msg.action)" />
     </div>
 </template>
+
+<style scoped>
+.negative-margin {    
+    --v-col-gap-y: -35px;
+}
+.reduce-margin {    
+    --v-col-gap-y: 1px;
+}
+.negative-bottom-margin
+{
+    margin-bottom: -15px;
+}
+</style>
