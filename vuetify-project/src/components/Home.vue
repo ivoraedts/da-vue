@@ -177,23 +177,27 @@ onMounted(() => {
                 <v-col cols="4" class="text-right">
                     <v-icon size="x-large" icon="mdi-thermometer"></v-icon>
                 </v-col>
-                <v-col cols="4" class="d-flex align-center justify-center">
-                    <span class="text-display-small">{{ latestMeasurement?.insideTemperatureCelsius }}</span>
+                <v-col cols="4" class="d-flex align-left ">
+                    <span class="thermostat-display">{{ latestMeasurement?.insideTemperatureCelsius }}</span>
                 </v-col>
                 <v-col cols="4" class="text-left">
                     <v-icon size="x-large" icon="mdi-temperature-celsius"></v-icon>
                 </v-col>
             </v-row>
+            <v-row class="reduce-margin">
+            </v-row>
             <v-row>
                 <v-col cols="4" class="text-right">
                     <v-icon size="x-large" icon="mdi-water"></v-icon>
                 </v-col>
-                <v-col cols="4" class="d-flex align-center justify-center">
-                    <span class="text-display-small">{{ latestMeasurement?.humidityPercentage }}</span>
+                <v-col cols="4" class="d-flex align-left ">
+                    <span class="thermostat-display">{{ latestMeasurement?.humidityPercentage }}</span>
                 </v-col>
                 <v-col cols="4" class="text-left">
                     <v-icon size="x-large" icon="mdi-percent"></v-icon>
                 </v-col>
+            </v-row>
+                        <v-row class="reduce-margin">
             </v-row>
             <v-row>
                 <v-col cols="12" class="text-center">
@@ -267,7 +271,7 @@ onMounted(() => {
 }
 
 .reduce-margin {
-    --v-col-gap-y: 1px;
+    --v-col-gap-y: 7px;
 }
 
 .negative-bottom-margin {
@@ -275,10 +279,22 @@ onMounted(() => {
 }
 
 .huge-negative-margin {
-    --v-col-gap-y: -250px;
+    --v-col-gap-y: -270px;
 }
 
 .dont-print-on-front {
     z-index: -1;
+}
+
+.thermostat-display {
+    font-family: 'DotoDigital', sans-serif;
+    font-size: 3rem;
+    font-weight: 400;
+    margin-bottom: -5px;
+    margin-top: -20px;
+    color: rgb(255, 255, 235);
+    /* Extra styling for that LED look */
+    letter-spacing: 0.1em;
+    text-shadow: 0 0 5px yellow;
 }
 </style>
