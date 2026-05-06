@@ -11,14 +11,12 @@
       <v-row>
         <v-col cols="12">
           <v-card class="py-4" color="secondary" rounded="lg" variant="tonal">
-            <template #prepend>
+            <template v-if="!$vuetify.display.xs" #prepend>
               <v-avatar class="ml-2 mr-4" icon="mdi-rocket-launch-outline" size="60" variant="tonal" />
             </template>
 
             <template #title>
-              <div class="my-title my-uppercase text-headline-medium font-weight-bold">Got started with
-                <br class="hidden-md-and-up" />
-                Vue
+              <div class="my-title my-uppercase text-headline-medium font-weight-bold">Got started with Vue
               </div>
             </template>
 
@@ -50,8 +48,8 @@
                 <p class="text-wrap">
                   ...and when I was thinking about what I could display without too much hassle
                   , I came up with the idea to show the measured temperatures from my TADO smart thermostat.
-                  <br/>
-                  I found the following library (open source on GitHub and available via NuGet) 
+                  <br />
+                  I found the following library (open source on GitHub and available via NuGet)
                   and information that could help me with the implementation:
                 </p>
                 <v-row>
