@@ -174,30 +174,30 @@ onMounted(() => {
             <v-row class="huge-negative-margin">
             </v-row>
             <v-row>
-                <v-col cols="4" class="text-right">
+                <v-col cols="3" sm="4" class="text-right">
                     <v-icon size="x-large" icon="mdi-thermometer"></v-icon>
                 </v-col>
-                <v-col cols="4" class="d-flex align-left ">
+                <v-col cols="6" sm="4" class="d-flex align-left ">
                     <span class="thermostat-display">{{ latestMeasurement?.insideTemperatureCelsius }}</span>
                 </v-col>
-                <v-col cols="4" class="text-left">
+                <v-col cols="3" sm="4" class="text-left">
                     <v-icon size="x-large" icon="mdi-temperature-celsius"></v-icon>
                 </v-col>
             </v-row>
-            <v-row class="reduce-margin">
+            <v-row :class="$vuetify.display.xs ? 'reduce-margin-more' : 'reduce-margin'">
             </v-row>
             <v-row>
-                <v-col cols="4" class="text-right">
+                <v-col cols="3" sm="4" class="text-right">
                     <v-icon size="x-large" icon="mdi-water"></v-icon>
                 </v-col>
-                <v-col cols="4" class="d-flex align-left ">
+                <v-col cols="6" sm="4" class="d-flex align-left ">
                     <span class="thermostat-display">{{ latestMeasurement?.humidityPercentage }}</span>
                 </v-col>
-                <v-col cols="4" class="text-left">
+                <v-col cols="3" sm="4" class="text-left">
                     <v-icon size="x-large" icon="mdi-percent"></v-icon>
                 </v-col>
             </v-row>
-                        <v-row class="reduce-margin">
+            <v-row :class="$vuetify.display.xs ? 'reduce-margin-more' : 'reduce-margin'">
             </v-row>
             <v-row>
                 <v-col cols="12" class="text-center">
@@ -272,6 +272,10 @@ onMounted(() => {
 
 .reduce-margin {
     --v-col-gap-y: 7px;
+}
+
+.reduce-margin-more {
+    --v-col-gap-y: 1px;
 }
 
 .negative-bottom-margin {
