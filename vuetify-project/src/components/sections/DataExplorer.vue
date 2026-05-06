@@ -34,10 +34,10 @@ function showLastMonthMeasurements() {
         <v-card variant="elevated" color="primary" class="mx-auto mt-5" max-width="500">
             <v-row>
                 <v-col cols="12" class="text-center">
-                    <h1>Data Explorer</h1>
+                    <h1 class="less-text-margin">Data Explorer</h1>
                 </v-col>
             </v-row>
-            <v-row>
+            <v-row class="no-margin">
                 <v-col cols="12" class="text-center">
                     <v-btn-toggle v-model="showSection" divided rounded="xl" border>
                         <v-btn value="actual measurements">
@@ -81,7 +81,7 @@ function showLastMonthMeasurements() {
         <div v-else-if="showSection === 'last month measurements'">
             <LastMonthMeasurements />
         </div>
-        <v-row>
+        <v-row class="some-margin">
             <v-col cols="12" class="text-center">
                 <v-btn variant="elevated" @click="goBackToOverview()" prepend-icon="mdi-undo" elevated color="red">
                     Back to overview
@@ -90,3 +90,17 @@ function showLastMonthMeasurements() {
         </v-row>
     </v-container>
 </template>
+
+<style scoped>
+.no-margin {
+    --v-col-gap-y: 0px;
+}
+.less-text-margin{
+    margin-block-start: 5px;
+    margin-block-end: 5px;
+}
+.some-margin {
+    margin-block-start: 5px;
+}
+
+</style>
