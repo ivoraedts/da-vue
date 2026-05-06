@@ -31,7 +31,7 @@ function showToDoPage() {
         <template v-slot:prepend>
           <v-app-bar-nav-icon @click="showHomePage()"></v-app-bar-nav-icon>
         </template>
-        <v-app-bar-title :class="$vuetify.display.xs ? 'phone-menu-title' : ''">
+        <v-app-bar-title :class="$vuetify.display.xs ? 'phone-menu-title' : ''" @click="showHomePage()">
           <span>Da Vue</span>
         </v-app-bar-title>
         <v-btn append-icon="mdi-information-outline" color="green-darken-4" @click="showAboutPage()">
