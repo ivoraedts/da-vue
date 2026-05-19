@@ -661,6 +661,7 @@ services:
 
 ## Synology Reverse Proxy Rules
 Set up in `Control Panel > Login Portal > Advanced > Reverse Proxy`.
+Dutch version: `Configuratiescherm > Aanmeldingsportaal > Geavanceerd > Reverse Proxy`.
 
 
 | Service | Source (Public HTTPS) | Destination (Internal HTTP) |
