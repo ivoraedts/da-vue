@@ -10,7 +10,7 @@ function goBackToOverview() {
     emit('response', { action: 'goBackToOverview' });
 }
 
-const showSection: Ref<string, string> = ref("none");
+const showSection: Ref<string, string> = ref("last day measurements");
 
 function showActualMeasurements() {
     showSection.value = "actual measurements";
