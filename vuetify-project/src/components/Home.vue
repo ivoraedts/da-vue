@@ -145,12 +145,24 @@ onMounted(() => {
                     <v-img v-if="$vuetify.display.sm" height="200" src="@/assets/LogoIncludingTado-small.png" />
                     <v-img v-if="$vuetify.display.md" height="250" src="@/assets/LogoIncludingTado-small.png" />
                     <v-img v-if="$vuetify.display.lg" height="300" src="@/assets/LogoIncludingTado-medium.png" />
-                    <v-img v-if="$vuetify.display.xlAndUp" height="350" src="@/assets/LogoIncludingTado-large.png" />
+                    <v-img v-if="$vuetify.display.xl" height="350" src="@/assets/LogoIncludingTado-large.png" />
+                    <v-img v-if="$vuetify.display.xxl" height="400" src="@/assets/LogoIncludingTado-large.png" />
                 </v-col>
             </v-row>
-            <v-row class="negative-margin negative-bottom-margin">
+            <v-row v-if="$vuetify.display.xs" class="pre-header-margin-xs"></v-row>
+            <v-row v-if="$vuetify.display.sm" class="pre-header-margin-sm"></v-row>
+            <v-row v-if="$vuetify.display.md" class="pre-header-margin-md"></v-row>
+            <v-row v-if="$vuetify.display.lg" class="pre-header-margin-lg"></v-row>
+            <v-row v-if="$vuetify.display.xl" class="pre-header-margin-xl"></v-row>
+            <v-row v-if="$vuetify.display.xxl" class="pre-header-margin-xxl"></v-row>
+            <v-row>
                 <v-col cols="12" class="text-center">
-                    <h1>Da Home Page</h1>
+                    <span v-if="$vuetify.display.xs" class="text-headline-large">Da Home Page</span>
+                    <span v-if="$vuetify.display.sm" class="text-display-small">Da Home Page</span>
+                    <span v-if="$vuetify.display.md" class="text-display-medium">Da Home Page</span>
+                    <span v-if="$vuetify.display.lg" class="text-display-large">Da Home Page</span>
+                    <span v-if="$vuetify.display.xl" class="text-groovy-header-small">Da Home Page</span>
+                    <span v-if="$vuetify.display.xxl" class="text-groovy-header-large">Da Home Page</span>
                 </v-col>
             </v-row>
         </v-card>
@@ -165,46 +177,75 @@ onMounted(() => {
             </v-row>
         </v-card>
 
-        <v-card variant="elevated" :color="latestMeasurementColor" v-if="showLatestMeasurement" class="mx-auto mt-5"
-            max-width="100%">
+        <v-card variant="elevated" :color="latestMeasurementColor" v-if="showLatestMeasurement" class="mx-auto mt-5">
             <v-row class="px-4 py-2" align="center">
                 <v-col cols="12" class="text-center">
-                    <span class="text-headline-small">Latest Measurement</span>
+                    <span v-if="$vuetify.display.xs" class="text-title-small">Latest Measurement</span>
+                    <span v-if="$vuetify.display.sm" class="text-title-large">Latest Measurement</span>
+                    <span v-if="$vuetify.display.md" class="text-headline-small">Latest Measurement</span>
+                    <span v-if="$vuetify.display.lg" class="text-headline-large">Latest Measurement</span>
+                    <span v-if="$vuetify.display.xl" class="text-display-small">Latest Measurement</span>
+                    <span v-if="$vuetify.display.xxl" class="text-display-large">Latest Measurement</span>
                 </v-col>
+            </v-row>
+                        <v-row v-if="$vuetify.display.xs" class="small-negative-margin-xs"></v-row>
+            <v-row v-if="$vuetify.display.sm" class="small-negative-margin-sm"></v-row>
+            <v-row v-if="$vuetify.display.md" class="small-negative-margin-md"></v-row>
+            <v-row v-if="$vuetify.display.lg" class="small-negative-margin-lg"></v-row>
+            <v-row v-if="$vuetify.display.xl" class="small-negative-margin-xl"></v-row>
+            <v-row v-if="$vuetify.display.xxl" class="small-negative-margin-xxl"></v-row>
+            <v-row>
                 <v-col cols="12" class="text-center">
-                    <v-img v-if="$vuetify.display.xs" height="370" src="@/assets/tado-small.png" class="dont-print-on-front" />
-                    <v-img v-if="$vuetify.display.sm" height="440" src="@/assets/tado-small.png" class="dont-print-on-front" />
-                    <v-img v-if="$vuetify.display.md" height="450" src="@/assets/tado-small.png" class="dont-print-on-front" />
-                    <v-img v-if="$vuetify.display.lg" height="600" src="@/assets/tado-medium.png" class="dont-print-on-front" />
-                    <v-img v-if="$vuetify.display.xlAndUp" height="800" src="@/assets/tado-medium.png" class="dont-print-on-front" />
+                    <v-img v-if="$vuetify.display.xs" height="390" src="@/assets/tado-small.png"
+                        class="dont-print-on-front" />
+                    <v-img v-if="$vuetify.display.sm" height="440" src="@/assets/tado-small.png"
+                        class="dont-print-on-front" />
+                    <v-img v-if="$vuetify.display.md" height="450" src="@/assets/tado-small.png"
+                        class="dont-print-on-front" />
+                    <v-img v-if="$vuetify.display.lg" height="600" src="@/assets/tado-medium.png"
+                        class="dont-print-on-front" />
+                    <v-img v-if="$vuetify.display.xl" height="800" src="@/assets/tado-medium.png"
+                        class="dont-print-on-front" />
+                    <v-img v-if="$vuetify.display.xxl" height="1100" src="@/assets/tado-large.png"
+                        class="dont-print-on-front" />
                 </v-col>
             </v-row>
             <v-row v-if="$vuetify.display.xs" class="huge-negative-margin-xs"></v-row>
             <v-row v-if="$vuetify.display.sm" class="huge-negative-margin-sm"></v-row>
             <v-row v-if="$vuetify.display.md" class="huge-negative-margin-md"></v-row>
             <v-row v-if="$vuetify.display.lg" class="huge-negative-margin-lg"></v-row>
-            <v-row v-if="$vuetify.display.xlAndUp" class="huge-negative-margin-xlAndUp"></v-row>
+            <v-row v-if="$vuetify.display.xl" class="huge-negative-margin-xl"></v-row>
+            <v-row v-if="$vuetify.display.xxl" class="huge-negative-margin-xxl"></v-row>
             <v-row>
                 <v-col cols="3" sm="4" class="text-right">
                     <v-icon v-if="$vuetify.display.xs" size="2.5rem" icon="mdi-thermometer"></v-icon>
                     <v-icon v-if="$vuetify.display.sm" size="4rem" icon="mdi-thermometer"></v-icon>
                     <v-icon v-if="$vuetify.display.md" size="4rem" icon="mdi-thermometer"></v-icon>
                     <v-icon v-if="$vuetify.display.lg" size="5.5rem" icon="mdi-thermometer"></v-icon>
-                    <v-icon v-if="$vuetify.display.xlAndUp" size="7.5rem" icon="mdi-thermometer"></v-icon>
+                    <v-icon v-if="$vuetify.display.xl" size="7.5rem" icon="mdi-thermometer"></v-icon>
+                    <v-icon v-if="$vuetify.display.xxl" size="10.5rem" icon="mdi-thermometer"></v-icon>
                 </v-col>
                 <v-col cols="6" sm="4" class="d-flex align-left ">
-                    <span v-if="$vuetify.display.xs" class="thermostat-display-xs">{{ latestMeasurement?.insideTemperatureCelsius }}</span>
-                    <span v-if="$vuetify.display.sm" class="thermostat-display-sm">{{ latestMeasurement?.insideTemperatureCelsius }}</span>
-                    <span v-if="$vuetify.display.md" class="thermostat-display-md">{{ latestMeasurement?.insideTemperatureCelsius }}</span>
-                    <span v-if="$vuetify.display.lg" class="thermostat-display-lg">{{ latestMeasurement?.insideTemperatureCelsius }}</span>
-                    <span v-if="$vuetify.display.xlAndUp" class="thermostat-display-xlAndUp">{{ latestMeasurement?.insideTemperatureCelsius }}</span>
+                    <span v-if="$vuetify.display.xs" class="thermostat-display-xs">{{
+                        latestMeasurement?.insideTemperatureCelsius }}</span>
+                    <span v-if="$vuetify.display.sm" class="thermostat-display-sm">{{
+                        latestMeasurement?.insideTemperatureCelsius }}</span>
+                    <span v-if="$vuetify.display.md" class="thermostat-display-md">{{
+                        latestMeasurement?.insideTemperatureCelsius }}</span>
+                    <span v-if="$vuetify.display.lg" class="thermostat-display-lg">{{
+                        latestMeasurement?.insideTemperatureCelsius }}</span>
+                    <span v-if="$vuetify.display.xl" class="thermostat-display-xl">{{
+                        latestMeasurement?.insideTemperatureCelsius }}</span>
+                    <span v-if="$vuetify.display.xxl" class="thermostat-display-xxl">{{
+                        latestMeasurement?.insideTemperatureCelsius }}</span>
                 </v-col>
                 <v-col cols="3" sm="4" class="text-left">
                     <v-icon v-if="$vuetify.display.xs" size="2.5rem" icon="mdi-temperature-celsius"></v-icon>
                     <v-icon v-if="$vuetify.display.sm" size="4rem" icon="mdi-temperature-celsius"></v-icon>
                     <v-icon v-if="$vuetify.display.md" size="4rem" icon="mdi-temperature-celsius"></v-icon>
                     <v-icon v-if="$vuetify.display.lg" size="5.5rem" icon="mdi-temperature-celsius"></v-icon>
-                    <v-icon v-if="$vuetify.display.xlAndUp" size="7.5rem" icon="mdi-temperature-celsius"></v-icon>
+                    <v-icon v-if="$vuetify.display.xl" size="7.5rem" icon="mdi-temperature-celsius"></v-icon>
+                    <v-icon v-if="$vuetify.display.xxl" size="10.5rem" icon="mdi-temperature-celsius"></v-icon>
                 </v-col>
             </v-row>
             <v-row :class="$vuetify.display.xs ? 'reduce-margin-more' : 'reduce-margin'">
@@ -215,21 +256,30 @@ onMounted(() => {
                     <v-icon v-if="$vuetify.display.sm" size="4rem" icon="mdi-water"></v-icon>
                     <v-icon v-if="$vuetify.display.md" size="4rem" icon="mdi-water"></v-icon>
                     <v-icon v-if="$vuetify.display.lg" size="5.5rem" icon="mdi-water"></v-icon>
-                    <v-icon v-if="$vuetify.display.xlAndUp" size="7.5rem" icon="mdi-water"></v-icon>
+                    <v-icon v-if="$vuetify.display.xl" size="7.5rem" icon="mdi-water"></v-icon>
+                    <v-icon v-if="$vuetify.display.xxl" size="10.5rem" icon="mdi-water"></v-icon>
                 </v-col>
                 <v-col cols="6" sm="4" class="d-flex align-left ">
-                    <span v-if="$vuetify.display.xs" class="thermostat-display-xs">{{ latestMeasurement?.humidityPercentage }}</span>
-                    <span v-if="$vuetify.display.sm" class="thermostat-display-sm">{{ latestMeasurement?.humidityPercentage }}</span>
-                    <span v-if="$vuetify.display.md" class="thermostat-display-md">{{ latestMeasurement?.humidityPercentage }}</span>
-                    <span v-if="$vuetify.display.lg" class="thermostat-display-lg">{{ latestMeasurement?.humidityPercentage }}</span>
-                    <span v-if="$vuetify.display.xlAndUp" class="thermostat-display-xlAndUp">{{ latestMeasurement?.humidityPercentage }}</span>
+                    <span v-if="$vuetify.display.xs" class="thermostat-display-xs">{{
+                        latestMeasurement?.humidityPercentage }}</span>
+                    <span v-if="$vuetify.display.sm" class="thermostat-display-sm">{{
+                        latestMeasurement?.humidityPercentage }}</span>
+                    <span v-if="$vuetify.display.md" class="thermostat-display-md">{{
+                        latestMeasurement?.humidityPercentage }}</span>
+                    <span v-if="$vuetify.display.lg" class="thermostat-display-lg">{{
+                        latestMeasurement?.humidityPercentage }}</span>
+                    <span v-if="$vuetify.display.xl" class="thermostat-display-xl">{{
+                        latestMeasurement?.humidityPercentage }}</span>
+                    <span v-if="$vuetify.display.xxl" class="thermostat-display-xxl">{{
+                        latestMeasurement?.humidityPercentage }}</span>
                 </v-col>
                 <v-col cols="3" sm="4" class="text-left">
-                    <v-icon v-if="$vuetify.display.xs"  size="2.5rem" icon="mdi-percent"></v-icon>
-                    <v-icon v-if="$vuetify.display.sm"  size="4rem" icon="mdi-percent"></v-icon>
-                    <v-icon v-if="$vuetify.display.md"  size="4rem" icon="mdi-percent"></v-icon>
-                    <v-icon v-if="$vuetify.display.lg"  size="5.5rem" icon="mdi-percent"></v-icon>
-                    <v-icon v-if="$vuetify.display.xlAndUp"  size="7.5rem" icon="mdi-percent"></v-icon>
+                    <v-icon v-if="$vuetify.display.xs" size="2.5rem" icon="mdi-percent"></v-icon>
+                    <v-icon v-if="$vuetify.display.sm" size="4rem" icon="mdi-percent"></v-icon>
+                    <v-icon v-if="$vuetify.display.md" size="4rem" icon="mdi-percent"></v-icon>
+                    <v-icon v-if="$vuetify.display.lg" size="5.5rem" icon="mdi-percent"></v-icon>
+                    <v-icon v-if="$vuetify.display.xl" size="7.5rem" icon="mdi-percent"></v-icon>
+                    <v-icon v-if="$vuetify.display.xxl" size="10.5rem" icon="mdi-percent"></v-icon>
                 </v-col>
             </v-row>
             <v-row :class="$vuetify.display.xs ? 'reduce-margin-more' : 'reduce-margin'">
@@ -237,24 +287,35 @@ onMounted(() => {
             <v-row>
                 <v-col cols="12" class="text-center">
                     <v-btn class="custom-flex-btn" @click="showDataExplorer()">
-                        <v-icon  v-if="$vuetify.display.xs" size="1rem">mdi-chart-line</v-icon>
-                        <v-icon  v-if="$vuetify.display.sm" size="2rem">mdi-chart-line</v-icon>
-                        <v-icon  v-if="$vuetify.display.md" size="2.1rem">mdi-chart-line</v-icon>
-                        <v-icon  v-if="$vuetify.display.lg" size="3.2rem">mdi-chart-line</v-icon>
-                        <v-icon  v-if="$vuetify.display.xlAndUp" size="5rem">mdi-chart-line</v-icon>
+                        <v-icon v-if="$vuetify.display.xs" size="1.4rem">mdi-chart-line</v-icon>
+                        <v-icon v-if="$vuetify.display.sm" size="2rem">mdi-chart-line</v-icon>
+                        <v-icon v-if="$vuetify.display.md" size="2.1rem">mdi-chart-line</v-icon>
+                        <v-icon v-if="$vuetify.display.lg" size="3.2rem">mdi-chart-line</v-icon>
+                        <v-icon v-if="$vuetify.display.xl" size="5rem">mdi-chart-line</v-icon>
+                        <v-icon v-if="$vuetify.display.xxl" size="8rem">mdi-chart-line</v-icon>
                     </v-btn>
                 </v-col>
                 <v-col cols="12" class="text-center">
-                    <br v-if="$vuetify.display.sm" ></br>
-                    <br v-if="$vuetify.display.md" ></br>
-                    <br v-if="$vuetify.display.lg" ></br>
-                    <br v-if="$vuetify.display.xlAndUp" ></br>
-                    <br v-if="$vuetify.display.xlAndUp" ></br>
-                    <span v-if="$vuetify.display.xs" class="text-body-small">Retrieved At: {{ new Date(latestMeasurement?.retrievedAt ?? "").toLocaleString() }}</span>
-                    <span v-if="$vuetify.display.sm" class="text-body-large">Retrieved At: {{ new Date(latestMeasurement?.retrievedAt ?? "").toLocaleString() }}</span>
-                    <span v-if="$vuetify.display.md" class="text-headline-small">Retrieved At: {{ new Date(latestMeasurement?.retrievedAt ?? "").toLocaleString() }}</span>
-                    <span v-if="$vuetify.display.lg" class="text-headline-large">Retrieved At: {{ new Date(latestMeasurement?.retrievedAt ?? "").toLocaleString() }}</span>
-                    <span v-if="$vuetify.display.xlAndUp" class="text-display-small">Retrieved At: {{ new Date(latestMeasurement?.retrievedAt ?? "").toLocaleString() }}</span>
+                    <br v-if="$vuetify.display.sm"></br>
+                    <br v-if="$vuetify.display.md"></br>
+                    <br v-if="$vuetify.display.lg"></br>
+                    <br v-if="$vuetify.display.xl"></br>
+                    <br v-if="$vuetify.display.xl"></br>
+                    <br v-if="$vuetify.display.xxl"></br>
+                    <br v-if="$vuetify.display.xxl"></br>
+                    <br v-if="$vuetify.display.xxl"></br>
+                    <span v-if="$vuetify.display.xs" class="text-body-small">Retrieved At: {{ new
+                        Date(latestMeasurement?.retrievedAt ?? "").toLocaleString() }}</span>
+                    <span v-if="$vuetify.display.sm" class="text-body-large">Retrieved At: {{ new
+                        Date(latestMeasurement?.retrievedAt ?? "").toLocaleString() }}</span>
+                    <span v-if="$vuetify.display.md" class="text-headline-small">Retrieved At: {{ new
+                        Date(latestMeasurement?.retrievedAt ?? "").toLocaleString() }}</span>
+                    <span v-if="$vuetify.display.lg" class="text-headline-large">Retrieved At: {{ new
+                        Date(latestMeasurement?.retrievedAt ?? "").toLocaleString() }}</span>
+                    <span v-if="$vuetify.display.xl" class="text-display-small">Retrieved At: {{ new
+                        Date(latestMeasurement?.retrievedAt ?? "").toLocaleString() }}</span>
+                    <span v-if="$vuetify.display.xxl" class="text-display-large">Retrieved At: {{ new
+                        Date(latestMeasurement?.retrievedAt ?? "").toLocaleString() }}</span>
                 </v-col>
             </v-row>
         </v-card>
@@ -313,6 +374,30 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.pre-header-margin-xs {
+    --v-col-gap-y: -30px;
+}
+
+.pre-header-margin-sm {
+    --v-col-gap-y: -30px;
+}
+
+.pre-header-margin-md {
+    --v-col-gap-y: -30px;
+}
+
+.pre-header-margin-lg {
+    --v-col-gap-y: -30px;
+}
+
+.pre-header-margin-xl {
+    --v-col-gap-y: -30px;
+}
+
+.pre-header-margin-xxl {
+    --v-col-gap-y: -35px;
+}
+
 .negative-margin {
     --v-col-gap-y: -35px;
 }
@@ -329,21 +414,54 @@ onMounted(() => {
     margin-bottom: -15px;
 }
 
-.huge-negative-margin-xs {
-    --v-col-gap-y: -270px;
+.small-negative-margin-xs {
+    --v-col-gap-y: -37px;
 }
+
+.small-negative-margin-sm {
+    --v-col-gap-y: -37px;
+}
+
+.small-negative-margin-md {
+    --v-col-gap-y: -37px;
+}
+
+.small-negative-margin-lg {
+    --v-col-gap-y: -42px;
+}
+
+.small-negative-margin-xl {
+    --v-col-gap-y: -45px;
+}
+
+.small-negative-margin-xxl {
+    --v-col-gap-y: -55px;
+}
+
+.huge-negative-margin-xs {
+    --v-col-gap-y: -300px;
+}
+
 .huge-negative-margin-sm {
     --v-col-gap-y: -320px;
 }
+
 .huge-negative-margin-md {
-    --v-col-gap-y: -370px;
+    --v-col-gap-y: -360px;
 }
+
 .huge-negative-margin-lg {
-    --v-col-gap-y: -490px;
+    --v-col-gap-y: -500px;
 }
-.huge-negative-margin-xlAndUp {
+
+.huge-negative-margin-xl {
     --v-col-gap-y: -630px;
 }
+
+.huge-negative-margin-xxl {
+    --v-col-gap-y: -850px;
+}
+
 .dont-print-on-front {
     z-index: -1;
 }
@@ -353,50 +471,73 @@ onMounted(() => {
 .thermostat-display-sm,
 .thermostat-display-md,
 .thermostat-display-lg,
-.thermostat-display-xlAndUp {
+.thermostat-display-xl,
+.thermostat-display-xxl {
     font-family: 'DotoDigital', sans-serif;
-    font-size: 3rem;
     font-weight: 400;
-    margin-bottom: -13px;
-    margin-top: -18px;
     color: rgb(255, 255, 235);
     /* Extra styling for that LED look */
     letter-spacing: 0.1em;
     text-shadow: 0 0 5px yellow;
 }
 
-.thermostat-display-sm
-{
+.thermostat-display-xs {
+    font-size: 3rem;
+    margin-bottom: 14px;
+    margin-top: -18px;
+}
+
+.thermostat-display-sm {
     font-size: 4rem;
     margin-bottom: -13px;
     margin-top: -20px;
 }
-.thermostat-display-md
-{
+
+.thermostat-display-md {
     font-size: 4.1rem;
     margin-bottom: 6px;
     margin-top: -20px;
 }
-.thermostat-display-lg
-{
+
+.thermostat-display-lg {
     font-size: 5.5rem;
     font-weight: 500;
-    margin-bottom: 19px;
+    margin-bottom: 28px;
     margin-top: -23px;
 }
-.thermostat-display-xlAndUp
-{
+
+.thermostat-display-xl {
     font-size: 8rem;
     font-weight: 500;
     margin-bottom: 19px;
     margin-top: -36px;
 }
 
+.thermostat-display-xxl {
+    font-size: 11rem;
+    font-weight: 600;
+    margin-bottom: 29px;
+    margin-top: -42px;
+}
+
 .custom-flex-btn {
-  /* Reset Vuetify's native button constraints */
-  min-width: unset !important; 
-  height: auto !important;
-  padding: 1rem !important;
-  border-radius: 50%; /* Re-creates the circular look */
+    /* Reset Vuetify's native button constraints */
+    min-width: unset !important;
+    height: auto !important;
+    padding: 1rem !important;
+    border-radius: 50%;
+    /* Re-creates the circular look */
+}
+
+.text-groovy-header-small {
+    font-size: 4rem;
+    font-weight: 450;
+    line-height: 4.5rem;
+}
+
+.text-groovy-header-large {
+    font-size: 5.5rem;
+    font-weight: 500;
+    line-height: 6rem;
 }
 </style>
