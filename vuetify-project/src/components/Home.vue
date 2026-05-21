@@ -398,10 +398,6 @@ onMounted(() => {
     --v-col-gap-y: -35px;
 }
 
-.negative-margin {
-    --v-col-gap-y: -35px;
-}
-
 .reduce-margin {
     --v-col-gap-y: 7px;
 }
@@ -410,12 +406,8 @@ onMounted(() => {
     --v-col-gap-y: 1px;
 }
 
-.negative-bottom-margin {
-    margin-bottom: -15px;
-}
-
 .small-negative-margin-xs {
-    --v-col-gap-y: -37px;
+    --v-col-gap-y: -65px;
 }
 
 .small-negative-margin-sm {
@@ -439,7 +431,7 @@ onMounted(() => {
 }
 
 .huge-negative-margin-xs {
-    --v-col-gap-y: -300px;
+    --v-col-gap-y: -318px;
 }
 
 .huge-negative-margin-sm {
