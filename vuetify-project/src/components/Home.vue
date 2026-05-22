@@ -16,7 +16,7 @@ import tadoLarge from '@/assets/tado-large.png'
 
 const { name } = useDisplay()
 
-const logoSrc = computed(() => {
+const logoSrc: Ref<string> = computed(() => {
     switch (name.value) {
         case 'xs':
         case 'sm':
@@ -31,7 +31,7 @@ const logoSrc = computed(() => {
     }
 })
 
-const tadoSrc = computed(() => {
+const tadoSrc: Ref<string> = computed(() => {
     switch (name.value) {
         case 'xs':
         case 'sm':
@@ -45,7 +45,44 @@ const tadoSrc = computed(() => {
             return tadoLarge
     }
 })
-const showSection: Ref<string, string> = ref("overview");
+
+const displayItemSize: Ref<string> = computed(() => {
+    switch (name.value) {
+        case 'xs':
+            return "2.5rem";
+        case 'sm':
+            return "4rem";
+        case 'md':
+            return "4rem";
+        case 'lg':
+            return "5.5rem";
+        case 'xl':
+            return "7.5rem";
+        case 'xxl':
+        default:
+            return "10.5rem";
+    }
+})
+
+const flexButtonSize: Ref<string> = computed(() => {
+    switch (name.value) {
+        case 'xs':
+            return "1.4rem";
+        case 'sm':
+            return "2rem";
+        case 'md':
+            return "2.1rem";
+        case 'lg':
+            return "3.2rem";
+        case 'xl':
+            return "5rem";
+        case 'xxl':
+        default:
+            return "8rem";
+    }
+})
+
+const showSection: Ref<string> = ref("overview");
 
 function showOverview() {
     showSection.value = "overview";
@@ -194,7 +231,9 @@ onMounted(() => {
             <v-row class="px-4 py-2" align="center">
                 <v-col cols="12" class="text-center">
                     <v-btn color="primary" @click="showInitializeTracking()" min-width="80%" size="x-large">
+                        <span class="responsive-sub-title">
                         Initialize Tado Temperature Tracking
+                        </span>
                     </v-btn>
                 </v-col>
             </v-row>
@@ -212,76 +251,29 @@ onMounted(() => {
                     <v-img class="tado-display dont-print-on-front" :src="tadoSrc" />
                 </v-col>
             </v-row>
-            <v-row v-if="$vuetify.display.xs" class="huge-negative-margin-xs"></v-row>
-            <v-row v-if="$vuetify.display.sm" class="huge-negative-margin-sm"></v-row>
-            <v-row v-if="$vuetify.display.md" class="huge-negative-margin-md"></v-row>
-            <v-row v-if="$vuetify.display.lg" class="huge-negative-margin-lg"></v-row>
-            <v-row v-if="$vuetify.display.xl" class="huge-negative-margin-xl"></v-row>
-            <v-row v-if="$vuetify.display.xxl" class="huge-negative-margin-xxl"></v-row>
+            <v-row class="responsive-print-over-image-negative-margin"></v-row>
             <v-row>
                 <v-col cols="3" sm="4" class="text-right">
-                    <v-icon v-if="$vuetify.display.xs" size="2.5rem" icon="mdi-thermometer"></v-icon>
-                    <v-icon v-if="$vuetify.display.sm" size="4rem" icon="mdi-thermometer"></v-icon>
-                    <v-icon v-if="$vuetify.display.md" size="4rem" icon="mdi-thermometer"></v-icon>
-                    <v-icon v-if="$vuetify.display.lg" size="5.5rem" icon="mdi-thermometer"></v-icon>
-                    <v-icon v-if="$vuetify.display.xl" size="7.5rem" icon="mdi-thermometer"></v-icon>
-                    <v-icon v-if="$vuetify.display.xxl" size="10.5rem" icon="mdi-thermometer"></v-icon>
+                    <v-icon :size="displayItemSize" icon="mdi-thermometer"></v-icon>
                 </v-col>
                 <v-col cols="6" sm="4" class="d-flex align-left ">
-                    <span v-if="$vuetify.display.xs" class="thermostat-display-xs">{{
-                        latestMeasurement?.insideTemperatureCelsius }}</span>
-                    <span v-if="$vuetify.display.sm" class="thermostat-display-sm">{{
-                        latestMeasurement?.insideTemperatureCelsius }}</span>
-                    <span v-if="$vuetify.display.md" class="thermostat-display-md">{{
-                        latestMeasurement?.insideTemperatureCelsius }}</span>
-                    <span v-if="$vuetify.display.lg" class="thermostat-display-lg">{{
-                        latestMeasurement?.insideTemperatureCelsius }}</span>
-                    <span v-if="$vuetify.display.xl" class="thermostat-display-xl">{{
-                        latestMeasurement?.insideTemperatureCelsius }}</span>
-                    <span v-if="$vuetify.display.xxl" class="thermostat-display-xxl">{{
-                        latestMeasurement?.insideTemperatureCelsius }}</span>
+                    <span class="thermostat-display">{{ latestMeasurement?.insideTemperatureCelsius }}</span>
                 </v-col>
                 <v-col cols="3" sm="4" class="text-left">
-                    <v-icon v-if="$vuetify.display.xs" size="2.5rem" icon="mdi-temperature-celsius"></v-icon>
-                    <v-icon v-if="$vuetify.display.sm" size="4rem" icon="mdi-temperature-celsius"></v-icon>
-                    <v-icon v-if="$vuetify.display.md" size="4rem" icon="mdi-temperature-celsius"></v-icon>
-                    <v-icon v-if="$vuetify.display.lg" size="5.5rem" icon="mdi-temperature-celsius"></v-icon>
-                    <v-icon v-if="$vuetify.display.xl" size="7.5rem" icon="mdi-temperature-celsius"></v-icon>
-                    <v-icon v-if="$vuetify.display.xxl" size="10.5rem" icon="mdi-temperature-celsius"></v-icon>
+                    <v-icon :size="displayItemSize" icon="mdi-temperature-celsius"></v-icon>
                 </v-col>
             </v-row>
             <v-row :class="$vuetify.display.xs ? 'reduce-margin-more' : 'reduce-margin'">
             </v-row>
             <v-row>
                 <v-col cols="3" sm="4" class="text-right">
-                    <v-icon v-if="$vuetify.display.xs" size="2.5rem" icon="mdi-water"></v-icon>
-                    <v-icon v-if="$vuetify.display.sm" size="4rem" icon="mdi-water"></v-icon>
-                    <v-icon v-if="$vuetify.display.md" size="4rem" icon="mdi-water"></v-icon>
-                    <v-icon v-if="$vuetify.display.lg" size="5.5rem" icon="mdi-water"></v-icon>
-                    <v-icon v-if="$vuetify.display.xl" size="7.5rem" icon="mdi-water"></v-icon>
-                    <v-icon v-if="$vuetify.display.xxl" size="10.5rem" icon="mdi-water"></v-icon>
+                    <v-icon :size="displayItemSize" icon="mdi-water"></v-icon>
                 </v-col>
                 <v-col cols="6" sm="4" class="d-flex align-left ">
-                    <span v-if="$vuetify.display.xs" class="thermostat-display-xs">{{
-                        latestMeasurement?.humidityPercentage }}</span>
-                    <span v-if="$vuetify.display.sm" class="thermostat-display-sm">{{
-                        latestMeasurement?.humidityPercentage }}</span>
-                    <span v-if="$vuetify.display.md" class="thermostat-display-md">{{
-                        latestMeasurement?.humidityPercentage }}</span>
-                    <span v-if="$vuetify.display.lg" class="thermostat-display-lg">{{
-                        latestMeasurement?.humidityPercentage }}</span>
-                    <span v-if="$vuetify.display.xl" class="thermostat-display-xl">{{
-                        latestMeasurement?.humidityPercentage }}</span>
-                    <span v-if="$vuetify.display.xxl" class="thermostat-display-xxl">{{
-                        latestMeasurement?.humidityPercentage }}</span>
+                    <span class="thermostat-display">{{ latestMeasurement?.humidityPercentage }}</span>
                 </v-col>
                 <v-col cols="3" sm="4" class="text-left">
-                    <v-icon v-if="$vuetify.display.xs" size="2.5rem" icon="mdi-percent"></v-icon>
-                    <v-icon v-if="$vuetify.display.sm" size="4rem" icon="mdi-percent"></v-icon>
-                    <v-icon v-if="$vuetify.display.md" size="4rem" icon="mdi-percent"></v-icon>
-                    <v-icon v-if="$vuetify.display.lg" size="5.5rem" icon="mdi-percent"></v-icon>
-                    <v-icon v-if="$vuetify.display.xl" size="7.5rem" icon="mdi-percent"></v-icon>
-                    <v-icon v-if="$vuetify.display.xxl" size="10.5rem" icon="mdi-percent"></v-icon>
+                    <v-icon :size="displayItemSize" icon="mdi-percent"></v-icon>
                 </v-col>
             </v-row>
             <v-row :class="$vuetify.display.xs ? 'reduce-margin-more' : 'reduce-margin'">
@@ -289,35 +281,15 @@ onMounted(() => {
             <v-row>
                 <v-col cols="12" class="text-center">
                     <v-btn class="custom-flex-btn" @click="showDataExplorer()">
-                        <v-icon v-if="$vuetify.display.xs" size="1.4rem">mdi-chart-line</v-icon>
-                        <v-icon v-if="$vuetify.display.sm" size="2rem">mdi-chart-line</v-icon>
-                        <v-icon v-if="$vuetify.display.md" size="2.1rem">mdi-chart-line</v-icon>
-                        <v-icon v-if="$vuetify.display.lg" size="3.2rem">mdi-chart-line</v-icon>
-                        <v-icon v-if="$vuetify.display.xl" size="5rem">mdi-chart-line</v-icon>
-                        <v-icon v-if="$vuetify.display.xxl" size="8rem">mdi-chart-line</v-icon>
+                        <v-icon :size="flexButtonSize">mdi-chart-line</v-icon>
                     </v-btn>
                 </v-col>
+            </v-row>
+            <v-row class="responsive-go-after-image-margin"></v-row>
+            <v-row>
                 <v-col cols="12" class="text-center">
-                    <br v-if="$vuetify.display.sm"></br>
-                    <br v-if="$vuetify.display.md"></br>
-                    <br v-if="$vuetify.display.lg"></br>
-                    <br v-if="$vuetify.display.xl"></br>
-                    <br v-if="$vuetify.display.xl"></br>
-                    <br v-if="$vuetify.display.xxl"></br>
-                    <br v-if="$vuetify.display.xxl"></br>
-                    <br v-if="$vuetify.display.xxl"></br>
-                    <span v-if="$vuetify.display.xs" class="text-body-small">Retrieved At: {{ new
-                        Date(latestMeasurement?.retrievedAt ?? "").toLocaleString() }}</span>
-                    <span v-if="$vuetify.display.sm" class="text-body-large">Retrieved At: {{ new
-                        Date(latestMeasurement?.retrievedAt ?? "").toLocaleString() }}</span>
-                    <span v-if="$vuetify.display.md" class="text-headline-small">Retrieved At: {{ new
-                        Date(latestMeasurement?.retrievedAt ?? "").toLocaleString() }}</span>
-                    <span v-if="$vuetify.display.lg" class="text-headline-large">Retrieved At: {{ new
-                        Date(latestMeasurement?.retrievedAt ?? "").toLocaleString() }}</span>
-                    <span v-if="$vuetify.display.xl" class="text-display-small">Retrieved At: {{ new
-                        Date(latestMeasurement?.retrievedAt ?? "").toLocaleString() }}</span>
-                    <span v-if="$vuetify.display.xxl" class="text-display-large">Retrieved At: {{ new
-                        Date(latestMeasurement?.retrievedAt ?? "").toLocaleString() }}</span>
+                    <span class="responsive-footer-text">Retrieved At: {{ new Date(latestMeasurement?.retrievedAt ??
+                        "").toLocaleString() }}</span>
                 </v-col>
             </v-row>
         </v-card>
@@ -328,7 +300,7 @@ onMounted(() => {
                 <v-col cols="12" class="text-center">
                     <v-row class="px-4 py-2" align="center">
                         <v-col cols="6" class="text-right">
-                            <h2>Tracking Schedule</h2>
+                            <span class="responsive-sub-title">Tracking Schedule</span>
                         </v-col>
                         <v-col cols="6" class="text-left">
                             <v-btn icon @click="showScheduleEditor()">
@@ -338,25 +310,38 @@ onMounted(() => {
                     </v-row>
                 </v-col>
                 <v-col v-if="!scheduleIsActive" cols="6" class="text-right">
-                    <v-icon color="yellow">mdi-alert</v-icon>
+                    <v-icon :size="displayItemSize" color="yellow">mdi-alert</v-icon>
                 </v-col>
                 <v-col v-if="!scheduleIsActive" cols="6" class="text-left">
-                    <h3>Deactivated</h3>
+                    <spam class="responsive-sub-title">Deactivated</spam>
                 </v-col>
                 <v-col cols="6">
-                    <p>Interval: {{ currentSchedule?.interval }} minutes</p>
-                    <p>Last Retrieval:</p>
-                    <p>{{ currentSchedule?.lastRetrievalTimeString }}</p>
+                    <p>
+                        <span class="responsive-body-text">Interval: </span><br />
+                        <span class="responsive-body-value-text">{{ currentSchedule?.interval }} minutes</span>
+                    </p>
+                                        <p>
+                        <span class="responsive-body-text">Last Retrieval: </span><br />
+                        <span class="responsive-body-value-text">{{ currentSchedule?.lastRetrievalTimeString }}</span>
+                    </p>
                 </v-col>
                 <v-col cols="6">
-                    <p>Zone name: {{ currentSchedule?.zoneName }}</p>
-                    <p>Next Retrieval:</p>
-                    <p>{{ currentSchedule?.nextRetrievalTimeString }}</p>
+                    <p>
+                        <span class="responsive-body-text">Zone name: </span><br />
+                        <span class="responsive-body-value-text">{{ currentSchedule?.zoneName }}</span>
+                    </p>
+                    <p>
+                        <span class="responsive-body-text">Next Retrieval:</span><br />
+                        <span class="responsive-body-value-text">{{ currentSchedule?.nextRetrievalTimeString }}</span>
+                    </p>
                 </v-col>
                 <v-col v-if="currentSchedule?.lastError" cols="12">
                     <p v-if="currentSchedule != null && currentSchedule.consecutiveFailures > 0">Fail streak: {{
                         currentSchedule?.consecutiveFailures }}</p>
-                    <p>Last Error: {{ currentSchedule?.lastError }}</p>
+                    <p>
+                        <span class="responsive-body-text">Last Error: </span><br />
+                        <span class="responsive-body-value-text">{{ currentSchedule?.lastError }}</span>
+                    </p>
                 </v-col>
             </v-row>
         </v-card>
@@ -393,11 +378,34 @@ onMounted(() => {
 }
 
 .responsive-sub-title {
+    font-size: 0.95rem;
+    font-weight: 550;
+    line-height: 1.25rem;
+    letter-spacing: 0rem;
+}
+
+.responsive-body-text {
+    opacity: 0.7;
     font-size: 0.875rem;
     font-weight: 500;
     line-height: 1.25rem;
     letter-spacing: 0.00625rem;
 }
+
+.responsive-body-value-text {
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    letter-spacing: 0.00625rem;
+}
+
+.responsive-footer-text {
+    font-size: 0.75rem;
+    font-weight: 400;
+    line-height: 1rem;
+    letter-spacing: 0.025rem;
+}
+
 
 .responsive-logo {
     height: 150px;
@@ -409,6 +417,27 @@ onMounted(() => {
 
 .tado-display {
     height: 390px;
+}
+
+.responsive-print-over-image-negative-margin {
+    --v-col-gap-y: -318px;
+}
+
+.responsive-go-after-image-margin {
+    --v-col-gap-y: 20px;
+}
+
+.thermostat-display {
+    font-family: 'DotoDigital', sans-serif;
+    font-weight: 400;
+    color: rgb(255, 255, 235);
+    /* Extra styling for that LED look */
+    letter-spacing: 0.1em;
+    text-shadow: 0 0 5px yellow;
+
+    font-size: 3rem;
+    margin-bottom: 14px;
+    margin-top: -18px;
 }
 
 /* Small screens (sm) and up */
@@ -431,6 +460,28 @@ onMounted(() => {
         letter-spacing: 0;
     }
 
+    .responsive-body-text {
+    opacity: 0.7;
+    font-size: 1.1rem;
+    font-weight: 400;
+    line-height: 1.25rem;
+    letter-spacing: 0;
+}
+
+.responsive-body-value-text {
+    font-size: 1.1rem;
+    font-weight: 400;
+    line-height: 1.25rem;
+    letter-spacing: 0;
+}
+
+    .responsive-footer-text {
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.5rem;
+        letter-spacing: 0.03125rem;
+    }
+
     .responsive-logo {
         height: 200px;
     }
@@ -441,6 +492,20 @@ onMounted(() => {
 
     .tado-display {
         height: 440px;
+    }
+
+    .responsive-print-over-image-negative-margin {
+        --v-col-gap-y: -320px;
+    }
+
+    .responsive-go-after-image-margin {
+        --v-col-gap-y: 15px;
+    }
+
+    .thermostat-display {
+        font-size: 4rem;
+        margin-bottom: -13px;
+        margin-top: -20px;
     }
 }
 
@@ -458,9 +523,31 @@ onMounted(() => {
     }
 
     .responsive-sub-title {
-        font-size: 1.5rem;
+        font-size: 1.8rem;
         font-weight: 400;
         line-height: 2rem;
+        letter-spacing: 0;
+    }
+
+        .responsive-body-text {
+    opacity: 0.7;
+    font-size: 1.2rem;
+    font-weight: 400;
+    line-height: 1.5rem;
+    letter-spacing: 0;
+}
+
+.responsive-body-value-text {
+    font-size: 1.2rem;
+    font-weight: 400;
+    line-height: 1.5rem;
+    letter-spacing: 0;
+}
+
+    .responsive-footer-text {
+        font-size: 1.375rem;
+        font-weight: 400;
+        line-height: 1.75rem;
         letter-spacing: 0;
     }
 
@@ -474,6 +561,20 @@ onMounted(() => {
 
     .tado-display {
         height: 450px;
+    }
+
+    .responsive-print-over-image-negative-margin {
+        --v-col-gap-y: -360px;
+    }
+
+    .thermostat-display {
+        font-size: 4.1rem;
+        margin-bottom: 6px;
+        margin-top: -20px;
+    }
+
+    .responsive-go-after-image-margin {
+        --v-col-gap-y: 10px;
     }
 }
 
@@ -491,9 +592,31 @@ onMounted(() => {
     }
 
     .responsive-sub-title {
-        font-size: 2rem;
+        font-size: 2.5rem;
         font-weight: 400;
         line-height: 2.5rem;
+        letter-spacing: 0;
+    }
+
+            .responsive-body-text {
+    opacity: 0.7;
+    font-size: 1.8rem;
+    font-weight: 400;
+    line-height: 2.5rem;
+    letter-spacing: 0;
+}
+
+.responsive-body-value-text {
+    font-size: 1.8rem;
+    font-weight: 400;
+    line-height: 2.5rem;
+    letter-spacing: 0;
+}
+
+    .responsive-footer-text {
+        font-size: 1.5rem;
+        font-weight: 400;
+        line-height: 2rem;
         letter-spacing: 0;
     }
 
@@ -507,6 +630,21 @@ onMounted(() => {
 
     .tado-display {
         height: 600px;
+    }
+
+    .responsive-print-over-image-negative-margin {
+        --v-col-gap-y: -500px;
+    }
+
+    .responsive-go-after-image-margin {
+        --v-col-gap-y: 22px;
+    }
+
+    .thermostat-display {
+        font-size: 5.5rem;
+        font-weight: 500;
+        margin-bottom: 28px;
+        margin-top: -23px;
     }
 }
 
@@ -523,10 +661,32 @@ onMounted(() => {
     }
 
     .responsive-sub-title {
-        font-size: 2.25rem;
-        font-weight: 400;
-        line-height: 2.75rem;
+        font-size: 3rem;
+        font-weight: 450;
+        line-height: 3.5rem;
         letter-spacing: 0;
+    }
+
+                .responsive-body-text {
+    opacity: 0.7;
+    font-size: 2.5rem;
+    font-weight: 400;
+    line-height: 3rem;
+    letter-spacing: 0.05rem;
+}
+
+.responsive-body-value-text {
+    font-size: 2.5rem;
+    font-weight: 400;
+    line-height: 3rem;
+    letter-spacing: 0.05rem;
+}
+
+    .responsive-footer-text {
+        font-size: 2rem;
+        font-weight: 400;
+        line-height: 2.5rem;
+        letter-spacing: 0rem;
     }
 
     .responsive-logo {
@@ -539,6 +699,21 @@ onMounted(() => {
 
     .tado-display {
         height: 800px;
+    }
+
+    .responsive-print-over-image-negative-margin {
+        --v-col-gap-y: -630px;
+    }
+
+    .responsive-go-after-image-margin {
+        --v-col-gap-y: 75px;
+    }
+
+    .thermostat-display {
+        font-size: 8rem;
+        font-weight: 500;
+        margin-bottom: 19px;
+        margin-top: -36px;
     }
 }
 
@@ -561,6 +736,28 @@ onMounted(() => {
         letter-spacing: -0.015625rem;
     }
 
+    .responsive-body-text {
+    opacity: 0.7;
+    font-size: 2.8rem;
+    font-weight: 400;
+    line-height: 3.5rem;
+    letter-spacing: 0.05rem;
+}
+
+.responsive-body-value-text {
+    font-size: 2.8rem;
+    font-weight: 400;
+    line-height: 3.5rem;
+    letter-spacing: 0.05rem;
+}
+
+    .responsive-footer-text {
+        font-size: 2.25rem;
+        font-weight: 400;
+        line-height: 2.75rem;
+        letter-spacing: 0;
+    }
+
     .responsive-logo {
         height: 400px;
     }
@@ -572,6 +769,17 @@ onMounted(() => {
     .tado-display {
         height: 1100px;
     }
+
+    .responsive-print-over-image-negative-margin {
+        --v-col-gap-y: -850px;
+    }
+
+    .thermostat-display {
+        font-size: 11rem;
+        font-weight: 600;
+        margin-bottom: 29px;
+        margin-top: -42px;
+    }
 }
 
 .reduce-margin {
@@ -582,86 +790,10 @@ onMounted(() => {
     --v-col-gap-y: 1px;
 }
 
-.huge-negative-margin-xs {
-    --v-col-gap-y: -318px;
-}
 
-.huge-negative-margin-sm {
-    --v-col-gap-y: -320px;
-}
-
-.huge-negative-margin-md {
-    --v-col-gap-y: -360px;
-}
-
-.huge-negative-margin-lg {
-    --v-col-gap-y: -500px;
-}
-
-.huge-negative-margin-xl {
-    --v-col-gap-y: -630px;
-}
-
-.huge-negative-margin-xxl {
-    --v-col-gap-y: -850px;
-}
 
 .dont-print-on-front {
     z-index: -1;
-}
-
-.thermostat-display,
-.thermostat-display-xs,
-.thermostat-display-sm,
-.thermostat-display-md,
-.thermostat-display-lg,
-.thermostat-display-xl,
-.thermostat-display-xxl {
-    font-family: 'DotoDigital', sans-serif;
-    font-weight: 400;
-    color: rgb(255, 255, 235);
-    /* Extra styling for that LED look */
-    letter-spacing: 0.1em;
-    text-shadow: 0 0 5px yellow;
-}
-
-.thermostat-display-xs {
-    font-size: 3rem;
-    margin-bottom: 14px;
-    margin-top: -18px;
-}
-
-.thermostat-display-sm {
-    font-size: 4rem;
-    margin-bottom: -13px;
-    margin-top: -20px;
-}
-
-.thermostat-display-md {
-    font-size: 4.1rem;
-    margin-bottom: 6px;
-    margin-top: -20px;
-}
-
-.thermostat-display-lg {
-    font-size: 5.5rem;
-    font-weight: 500;
-    margin-bottom: 28px;
-    margin-top: -23px;
-}
-
-.thermostat-display-xl {
-    font-size: 8rem;
-    font-weight: 500;
-    margin-bottom: 19px;
-    margin-top: -36px;
-}
-
-.thermostat-display-xxl {
-    font-size: 11rem;
-    font-weight: 600;
-    margin-bottom: 29px;
-    margin-top: -42px;
 }
 
 .custom-flex-btn {
