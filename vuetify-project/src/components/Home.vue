@@ -212,7 +212,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <v-container v-if="showSection === 'overview'">
+    <v-container fluid v-if="showSection === 'overview'">
         <v-card variant="elevated" color="primary" class="mx-auto" max-width="100%">
             <v-row>
                 <v-col cols="12" class="text-center">
@@ -253,26 +253,26 @@ onMounted(() => {
             </v-row>
             <v-row class="responsive-print-over-image-negative-margin"></v-row>
             <v-row>
-                <v-col cols="3" sm="4" class="text-right">
+                <v-col cols="3" sm="4" md="5" class="text-right">
                     <v-icon :size="displayItemSize" icon="mdi-thermometer"></v-icon>
                 </v-col>
-                <v-col cols="6" sm="4" class="d-flex align-left ">
+                <v-col cols="6" sm="4" md="2" class="d-flex align-left ">
                     <span class="thermostat-display">{{ latestMeasurement?.insideTemperatureCelsius }}</span>
                 </v-col>
-                <v-col cols="3" sm="4" class="text-left">
+                <v-col cols="3" sm="4" md="5" class="text-left">
                     <v-icon :size="displayItemSize" icon="mdi-temperature-celsius"></v-icon>
                 </v-col>
             </v-row>
             <v-row :class="$vuetify.display.xs ? 'reduce-margin-more' : 'reduce-margin'">
             </v-row>
             <v-row>
-                <v-col cols="3" sm="4" class="text-right">
+                <v-col cols="3" sm="4" md="5" class="text-right">
                     <v-icon :size="displayItemSize" icon="mdi-water"></v-icon>
                 </v-col>
-                <v-col cols="6" sm="4" class="d-flex align-left ">
+                <v-col cols="6" sm="4" md="2" class="d-flex align-left ">
                     <span class="thermostat-display">{{ latestMeasurement?.humidityPercentage }}</span>
                 </v-col>
-                <v-col cols="3" sm="4" class="text-left">
+                <v-col cols="3" sm="4" md="5" class="text-left">
                     <v-icon :size="displayItemSize" icon="mdi-percent"></v-icon>
                 </v-col>
             </v-row>
