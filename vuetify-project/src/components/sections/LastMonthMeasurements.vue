@@ -10,7 +10,7 @@ const lastMeasurements: Ref<DataMeasureMents[] | null> = ref<DataMeasureMents[]>
 async function getLastMonthlyAggregations() {
     // Get current date and subtract one month
     const now = new Date();
-    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const lastMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const year = lastMonth.getFullYear();
     const month = lastMonth.getMonth() + 1; // JS months are 0-based
 

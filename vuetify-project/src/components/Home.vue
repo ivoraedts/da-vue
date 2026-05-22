@@ -1,13 +1,88 @@
 <script setup lang="ts">
 import { ref, type Ref, onMounted, computed } from 'vue'
+import { useDisplay } from 'vuetify'
 import InitializeTracking from '@/components/InitializeTracking.vue'
 import ScheduleEditor from '@/components/sections/ScheduleEditor.vue'
 import DataExplorer from '@/components/sections/DataExplorer.vue'
 import type { TadoRetrievalScheduleModel } from '@/models/TadoRetrievalScheduleModel';
 import type { DataMeasureMents } from '@/models/DataMeasureMents';
 import { getMaterialColorForTemperature } from '@/utils/TemperatureDisplay';
+import logoSmall from '@/assets/LogoIncludingTado-small.png'
+import logoMedium from '@/assets/LogoIncludingTado-medium.png'
+import logoLarge from '@/assets/LogoIncludingTado-large.png'
+import tadoSmall from '@/assets/tado-small.png'
+import tadoMedium from '@/assets/tado-medium.png'
+import tadoLarge from '@/assets/tado-large.png'
 
-const showSection: Ref<string, string> = ref("overview");
+const { name } = useDisplay()
+
+const logoSrc: Ref<string> = computed(() => {
+    switch (name.value) {
+        case 'xs':
+        case 'sm':
+        case 'md':
+            return logoSmall
+        case 'lg':
+            return logoMedium
+        case 'xl':
+        case 'xxl':
+        default:
+            return logoLarge
+    }
+})
+
+const tadoSrc: Ref<string> = computed(() => {
+    switch (name.value) {
+        case 'xs':
+        case 'sm':
+        case 'md':
+            return tadoSmall
+        case 'lg':
+        case 'xl':
+            return tadoMedium
+        case 'xxl':
+        default:
+            return tadoLarge
+    }
+})
+
+const displayItemSize: Ref<string> = computed(() => {
+    switch (name.value) {
+        case 'xs':
+            return "2.5rem";
+        case 'sm':
+            return "4rem";
+        case 'md':
+            return "4rem";
+        case 'lg':
+            return "5.5rem";
+        case 'xl':
+            return "7.5rem";
+        case 'xxl':
+        default:
+            return "10.5rem";
+    }
+})
+
+const flexButtonSize: Ref<string> = computed(() => {
+    switch (name.value) {
+        case 'xs':
+            return "1.4rem";
+        case 'sm':
+            return "2rem";
+        case 'md':
+            return "2.1rem";
+        case 'lg':
+            return "3.2rem";
+        case 'xl':
+            return "5rem";
+        case 'xxl':
+        default:
+            return "8rem";
+    }
+})
+
+const showSection: Ref<string> = ref("overview");
 
 function showOverview() {
     showSection.value = "overview";
@@ -137,61 +212,102 @@ onMounted(() => {
 </script>
 
 <template>
-    <v-container v-if="showSection === 'overview'">
-        <v-card variant="elevated" color="primary" class="mx-auto mt-5" max-width="500">
+    <v-container fluid v-if="showSection === 'overview'">
+        <v-card variant="elevated" color="primary" class="mx-auto" max-width="100%">
             <v-row>
                 <v-col cols="12" class="text-center">
-                    <h1>Da Home Page</h1>
+                    <v-img class="responsive-logo" :src="logoSrc" />
+                </v-col>
+            </v-row>
+            <v-row class="pre-header-margin"></v-row>
+            <v-row>
+                <v-col cols="12" class="text-center">
+                    <span class="responsive-home-title">Da Home Page</span>
                 </v-col>
             </v-row>
         </v-card>
 
-        <v-card v-if="canInitializeTracking" class="mx-auto mt-5" max-width="500">
+        <v-card v-if="canInitializeTracking" variant="elevated" color="secondary" class="mx-auto mt-5" max-width="100%">
             <v-row class="px-4 py-2" align="center">
                 <v-col cols="12" class="text-center">
-                    <v-btn color="primary" @click="showInitializeTracking()">
-                        Initialize Tado Temperature Tracking
+                    <v-btn color="primary" @click="showInitializeTracking()" min-width="80%" size="x-large">
+                        <span class="responsive-sub-title">
+                            Initialize Tado Temperature Tracking
+                        </span>
                     </v-btn>
                 </v-col>
             </v-row>
         </v-card>
 
-        <v-card variant="elevated" :color="latestMeasurementColor" v-if="showLatestMeasurement" class="mx-auto mt-5"
-            max-width="500">
+        <v-card variant="elevated" :color="latestMeasurementColor" v-if="showLatestMeasurement" class="mx-auto mt-5">
+
+            <v-row class="responsive-small-negative-margin"></v-row>
+            <v-row>
+                <v-col cols="12" class="text-center">
+                    <v-img class="tado-display dont-print-on-front" :src="tadoSrc" />
+                </v-col>
+            </v-row>
+            <v-row class="responsive-print-over-image-negative-margin"></v-row>
             <v-row class="px-4 py-2" align="center">
                 <v-col cols="12" class="text-center">
-                    <span class="text-headline-small">Latest Measurement</span>
-
+                    <span class="responsive-sub-title">Latest Measurement</span>
                 </v-col>
-                <v-col cols="5" class="d-flex align-center justify-center">
-                    <v-icon size="x-large" icon="mdi-thermometer"></v-icon>
-                    <span class="text-display-small">{{ latestMeasurement?.insideTemperatureCelsius }}</span>
-                    <v-icon size="x-large" icon="mdi-temperature-celsius"></v-icon>
-                </v-col>
-                <v-col cols="5" class="d-flex align-center justify-center">
-                    <v-icon size="x-large" icon="mdi-water"></v-icon>
-                    <span class="text-display-small">{{ latestMeasurement?.humidityPercentage }}</span>
-                    <v-icon size="x-large" icon="mdi-percent"></v-icon>
-                </v-col>
-                <v-col cols="2" class="text-left">
-                    <v-btn icon @click="showDataExplorer()">
-                        <v-icon>mdi-chart-line</v-icon>
-                    </v-btn>
-                </v-col>
+            </v-row>
+            <v-row class="responsive-second-small-negative-margin"></v-row>
+            <v-row>
                 <v-col cols="12" class="text-center">
-                    <span class="text-body-small">Retrieved At: {{ new Date(latestMeasurement?.retrievedAt ??
+                    <span class="responsive-footer-text">Retrieved At: {{ new Date(latestMeasurement?.retrievedAt ??
                         "").toLocaleString() }}</span>
                 </v-col>
             </v-row>
+
+            <v-row justify="center">
+                <v-col cols="12" class="tado-display-width mx-auto">
+                    <v-row>
+                        <v-col cols="3" class="text-right">
+                            <v-icon :size="displayItemSize" icon="mdi-thermometer"></v-icon>
+                        </v-col>
+                        <v-col cols="6" class="d-flex align-left ">
+                            <span class="thermostat-display">{{ latestMeasurement?.insideTemperatureCelsius }}</span>
+                        </v-col>
+                        <v-col cols="3" class="text-left">
+                            <v-icon :size="displayItemSize" icon="mdi-temperature-celsius"></v-icon>
+                        </v-col>
+                    </v-row>
+                    <v-row :class="$vuetify.display.xs ? 'reduce-margin-more' : 'reduce-margin'">
+                    </v-row>
+                    <v-row>
+                        <v-col cols="3" class="text-right">
+                            <v-icon :size="displayItemSize" icon="mdi-water"></v-icon>
+                        </v-col>
+                        <v-col cols="6" class="d-flex align-left ">
+                            <span class="thermostat-display">{{ latestMeasurement?.humidityPercentage }}</span>
+                        </v-col>
+                        <v-col cols="3" class="text-left">
+                            <v-icon :size="displayItemSize" icon="mdi-percent"></v-icon>
+                        </v-col>
+                    </v-row>
+                </v-col>
+            </v-row>
+            <v-row :class="$vuetify.display.xs ? 'reduce-margin-more' : 'reduce-margin'">
+            </v-row>
+            <v-row>
+                <v-col cols="12" class="text-center">
+                    <v-btn class="custom-flex-btn" @click="showDataExplorer()">
+                        <v-icon :size="flexButtonSize">mdi-chart-line</v-icon>
+                    </v-btn>
+                </v-col>
+            </v-row>
+            <v-row class="responsive-go-after-image-margin"></v-row>
         </v-card>
 
         <v-card variant="elevated" :color="currentScheduleColor" v-if="canEditCurrentSchedule" class="mx-auto mt-5"
-            max-width="500">
+            max-width="100%">
             <v-row class="px-4 py-2" align="center">
                 <v-col cols="12" class="text-center">
                     <v-row class="px-4 py-2" align="center">
                         <v-col cols="6" class="text-right">
-                            <h2>Tracking Schedule</h2>
+                            <span class="responsive-sub-title">Tracking Schedule</span>
                         </v-col>
                         <v-col cols="6" class="text-left">
                             <v-btn icon @click="showScheduleEditor()">
@@ -201,25 +317,38 @@ onMounted(() => {
                     </v-row>
                 </v-col>
                 <v-col v-if="!scheduleIsActive" cols="6" class="text-right">
-                    <v-icon color="yellow">mdi-alert</v-icon>
+                    <v-icon :size="displayItemSize" color="yellow">mdi-alert</v-icon>
                 </v-col>
                 <v-col v-if="!scheduleIsActive" cols="6" class="text-left">
-                    <h3>Deactivated</h3>
+                    <spam class="responsive-sub-title">Deactivated</spam>
                 </v-col>
                 <v-col cols="6">
-                    <p>Interval: {{ currentSchedule?.interval }} minutes</p>
-                    <p>Last Retrieval:</p>
-                    <p>{{ currentSchedule?.lastRetrievalTimeString }}</p>
+                    <p>
+                        <span class="responsive-body-text">Interval: </span><br />
+                        <span class="responsive-body-value-text">{{ currentSchedule?.interval }} minutes</span>
+                    </p>
+                    <p>
+                        <span class="responsive-body-text">Last Retrieval: </span><br />
+                        <span class="responsive-body-value-text">{{ currentSchedule?.lastRetrievalTimeString }}</span>
+                    </p>
                 </v-col>
                 <v-col cols="6">
-                    <p>Zone name: {{ currentSchedule?.zoneName }}</p>
-                    <p>Next Retrieval:</p>
-                    <p>{{ currentSchedule?.nextRetrievalTimeString }}</p>
+                    <p>
+                        <span class="responsive-body-text">Zone name: </span><br />
+                        <span class="responsive-body-value-text">{{ currentSchedule?.zoneName }}</span>
+                    </p>
+                    <p>
+                        <span class="responsive-body-text">Next Retrieval:</span><br />
+                        <span class="responsive-body-value-text">{{ currentSchedule?.nextRetrievalTimeString }}</span>
+                    </p>
                 </v-col>
                 <v-col v-if="currentSchedule?.lastError" cols="12">
                     <p v-if="currentSchedule != null && currentSchedule.consecutiveFailures > 0">Fail streak: {{
                         currentSchedule?.consecutiveFailures }}</p>
-                    <p>Last Error: {{ currentSchedule?.lastError }}</p>
+                    <p>
+                        <span class="responsive-body-text">Last Error: </span><br />
+                        <span class="responsive-body-value-text">{{ currentSchedule?.lastError }}</span>
+                    </p>
                 </v-col>
             </v-row>
         </v-card>
@@ -237,3 +366,485 @@ onMounted(() => {
         <ScheduleEditor @response="(msg) => showOverviewWithComment(msg.action)" />
     </div>
 </template>
+
+
+
+
+
+<style scoped>
+/* Mobile First Defaults (xs) */
+.pre-header-margin {
+    --v-col-gap-y: -30px;
+}
+
+.responsive-home-title {
+    font-size: 2rem;
+    font-weight: 400;
+    line-height: 2.5rem;
+    letter-spacing: 0;
+}
+
+.responsive-sub-title {
+    font-size: 0.95rem;
+    font-weight: 550;
+    line-height: 1.25rem;
+    letter-spacing: 0rem;
+}
+
+.responsive-body-text {
+    opacity: 0.7;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    letter-spacing: 0.00625rem;
+}
+
+.responsive-body-value-text {
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    letter-spacing: 0.00625rem;
+}
+
+.responsive-footer-text {
+    font-size: 0.75rem;
+    font-weight: 400;
+    line-height: 1rem;
+    letter-spacing: 0.025rem;
+}
+
+
+.responsive-logo {
+    height: 150px;
+}
+
+.responsive-small-negative-margin {
+    margin-top: -50px;
+}
+
+.responsive-second-small-negative-margin {
+    margin-top: -30px;
+}
+
+.tado-display {
+    height: 390px;
+}
+
+.tado-display-width {
+    max-width: 400px;
+}
+
+.responsive-print-over-image-negative-margin {
+    --v-col-gap-y: -368px;
+}
+
+.responsive-go-after-image-margin {
+    --v-col-gap-y: 30px;
+}
+
+.thermostat-display {
+    font-family: 'DotoDigital', sans-serif;
+    font-weight: 400;
+    color: rgb(255, 255, 235);
+    /* Extra styling for that LED look */
+    letter-spacing: 0.1em;
+    text-shadow: 0 0 5px yellow;
+
+    font-size: 3rem;
+    margin-bottom: -2px;
+    margin-top: -18px;
+}
+
+/* Small screens (sm) and up */
+@media (min-width: 600px) {
+    .pre-header-margin {
+        --v-col-gap-y: -30px;
+    }
+
+    .responsive-home-title {
+        font-size: 2.25rem;
+        font-weight: 400;
+        line-height: 2.75rem;
+        letter-spacing: 0;
+    }
+
+    .responsive-sub-title {
+        font-size: 1.375rem;
+        font-weight: 400;
+        line-height: 1.75rem;
+        letter-spacing: 0;
+    }
+
+    .responsive-body-text {
+        opacity: 0.7;
+        font-size: 1.1rem;
+        font-weight: 400;
+        line-height: 1.25rem;
+        letter-spacing: 0;
+    }
+
+    .responsive-body-value-text {
+        font-size: 1.1rem;
+        font-weight: 400;
+        line-height: 1.25rem;
+        letter-spacing: 0;
+    }
+
+    .responsive-footer-text {
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.5rem;
+        letter-spacing: 0.03125rem;
+    }
+
+    .responsive-logo {
+        height: 200px;
+    }
+
+    .responsive-small-negative-margin {
+        margin-top: -20px;
+    }
+
+    .responsive-second-small-negative-margin {
+        margin-top: -20px;
+    }
+
+    .tado-display {
+        height: 440px;
+    }
+
+    .tado-display-width {
+        max-width: 450px;
+    }
+
+    .responsive-print-over-image-negative-margin {
+        --v-col-gap-y: -430px;
+    }
+
+    .responsive-go-after-image-margin {
+        --v-col-gap-y: 45px;
+    }
+
+    .thermostat-display {
+        font-size: 4rem;
+        margin-bottom: -3px;
+        margin-top: -20px;
+    }
+}
+
+/* Medium screens (md) and up */
+@media (min-width: 960px) {
+    .pre-header-margin {
+        --v-col-gap-y: -30px;
+    }
+
+    .responsive-home-title {
+        font-size: 2.8125rem;
+        font-weight: 400;
+        line-height: 3.25rem;
+        letter-spacing: 0;
+    }
+
+    .responsive-sub-title {
+        font-size: 1.8rem;
+        font-weight: 400;
+        line-height: 2rem;
+        letter-spacing: 0;
+    }
+
+    .responsive-body-text {
+        opacity: 0.7;
+        font-size: 1.2rem;
+        font-weight: 400;
+        line-height: 1.5rem;
+        letter-spacing: 0;
+    }
+
+    .responsive-body-value-text {
+        font-size: 1.2rem;
+        font-weight: 400;
+        line-height: 1.5rem;
+        letter-spacing: 0;
+    }
+
+    .responsive-footer-text {
+        font-size: 1.375rem;
+        font-weight: 400;
+        line-height: 1.75rem;
+        letter-spacing: 0;
+    }
+
+    .responsive-logo {
+        height: 250px;
+    }
+
+    .responsive-small-negative-margin {
+        --v-col-gap-y: -37px;
+    }
+
+    .tado-display {
+        height: 450px;
+    }
+
+    .tado-display-width {
+        max-width: 460px;
+    }
+
+    .responsive-print-over-image-negative-margin {
+        --v-col-gap-y: -440px;
+    }
+
+    .thermostat-display {
+        font-size: 4.1rem;
+        margin-bottom: -7px;
+        margin-top: -20px;
+    }
+
+    .responsive-go-after-image-margin {
+        --v-col-gap-y: 45px;
+    }
+}
+
+/* Large screens (lg) and up */
+@media (min-width: 1280px) {
+    .pre-header-margin {
+        --v-col-gap-y: -30px;
+    }
+
+    .responsive-home-title {
+        font-size: 3.5625rem;
+        font-weight: 400;
+        line-height: 4rem;
+        letter-spacing: -0.015625rem;
+    }
+
+    .responsive-sub-title {
+        font-size: 2.5rem;
+        font-weight: 400;
+        line-height: 2.5rem;
+        letter-spacing: 0;
+    }
+
+    .responsive-body-text {
+        opacity: 0.7;
+        font-size: 1.8rem;
+        font-weight: 400;
+        line-height: 2.5rem;
+        letter-spacing: 0;
+    }
+
+    .responsive-body-value-text {
+        font-size: 1.8rem;
+        font-weight: 400;
+        line-height: 2.5rem;
+        letter-spacing: 0;
+    }
+
+    .responsive-footer-text {
+        font-size: 1.5rem;
+        font-weight: 400;
+        line-height: 2rem;
+        letter-spacing: 0;
+    }
+
+    .responsive-logo {
+        height: 300px;
+    }
+
+    .responsive-small-negative-margin {
+        --v-col-gap-y: -42px;
+    }
+
+    .tado-display {
+        height: 600px;
+    }
+
+    .tado-display-width {
+        max-width: 610px;
+    }
+
+    .responsive-print-over-image-negative-margin {
+        --v-col-gap-y: -580px;
+    }
+
+    .responsive-go-after-image-margin {
+        --v-col-gap-y: 62px;
+    }
+
+    .thermostat-display {
+        font-size: 5.5rem;
+        font-weight: 500;
+        margin-bottom: 8px;
+        margin-top: -23px;
+    }
+}
+
+/* Extra Large (xl) and up */
+@media (min-width: 1904px) {
+    .pre-header-margin {
+        --v-col-gap-y: -30px;
+    }
+
+    .responsive-home-title {
+        font-size: 4rem;
+        font-weight: 450;
+        line-height: 4.5rem;
+    }
+
+    .responsive-sub-title {
+        font-size: 3rem;
+        font-weight: 450;
+        line-height: 3.5rem;
+        letter-spacing: 0;
+    }
+
+    .responsive-body-text {
+        opacity: 0.7;
+        font-size: 2.5rem;
+        font-weight: 400;
+        line-height: 3rem;
+        letter-spacing: 0.05rem;
+    }
+
+    .responsive-body-value-text {
+        font-size: 2.5rem;
+        font-weight: 400;
+        line-height: 3rem;
+        letter-spacing: 0.05rem;
+    }
+
+    .responsive-footer-text {
+        font-size: 2rem;
+        font-weight: 400;
+        line-height: 2.5rem;
+        letter-spacing: 0rem;
+    }
+
+    .responsive-logo {
+        height: 350px;
+    }
+
+    .responsive-small-negative-margin {
+        --v-col-gap-y: -45px;
+    }
+
+    .tado-display {
+        height: 800px;
+    }
+
+    .tado-display-width {
+        max-width: 820px;
+    }
+
+    .responsive-print-over-image-negative-margin {
+        --v-col-gap-y: -750px;
+    }
+
+    .responsive-go-after-image-margin {
+        --v-col-gap-y: 75px;
+    }
+
+    .thermostat-display {
+        font-size: 8rem;
+        font-weight: 500;
+        margin-bottom: 13px;
+        margin-top: -36px;
+    }
+}
+
+/* Ultra Large (xxl) */
+@media (min-width: 2560px) {
+    .pre-header-margin {
+        --v-col-gap-y: -35px;
+    }
+
+    .responsive-home-title {
+        font-size: 5.5rem;
+        font-weight: 500;
+        line-height: 6rem;
+    }
+
+    .responsive-sub-title {
+        font-size: 3.5625rem;
+        font-weight: 400;
+        line-height: 4rem;
+        letter-spacing: -0.015625rem;
+    }
+
+    .responsive-body-text {
+        opacity: 0.7;
+        font-size: 2.8rem;
+        font-weight: 400;
+        line-height: 3.5rem;
+        letter-spacing: 0.05rem;
+    }
+
+    .responsive-body-value-text {
+        font-size: 2.8rem;
+        font-weight: 400;
+        line-height: 3.5rem;
+        letter-spacing: 0.05rem;
+    }
+
+    .responsive-footer-text {
+        font-size: 2.25rem;
+        font-weight: 400;
+        line-height: 2.75rem;
+        letter-spacing: 0;
+    }
+
+    .responsive-logo {
+        height: 400px;
+    }
+
+    .responsive-small-negative-margin {
+        --v-col-gap-y: -55px;
+    }
+
+    .tado-display {
+        height: 1100px;
+    }
+
+    .tado-display-width {
+        max-width: 1140px;
+    }
+
+    .responsive-print-over-image-negative-margin {
+        --v-col-gap-y: -1000px;
+    }
+
+        .responsive-go-after-image-margin {
+        --v-col-gap-y: 115px;
+    }
+
+    .thermostat-display {
+        font-size: 11rem;
+        font-weight: 600;
+        margin-bottom: 29px;
+        margin-top: -42px;
+    }
+}
+
+.reduce-margin {
+    --v-col-gap-y: 7px;
+}
+
+.reduce-margin-more {
+    --v-col-gap-y: 1px;
+}
+
+
+
+.dont-print-on-front {
+    z-index: -1;
+}
+
+.custom-flex-btn {
+    /* Reset Vuetify's native button constraints */
+    min-width: unset !important;
+    height: auto !important;
+    padding: 1rem !important;
+    border-radius: 50%;
+    /* Re-creates the circular look */
+}
+</style>
