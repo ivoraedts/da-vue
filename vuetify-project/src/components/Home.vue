@@ -232,7 +232,7 @@ onMounted(() => {
                 <v-col cols="12" class="text-center">
                     <v-btn color="primary" @click="showInitializeTracking()" min-width="80%" size="x-large">
                         <span class="responsive-sub-title">
-                        Initialize Tado Temperature Tracking
+                            Initialize Tado Temperature Tracking
                         </span>
                     </v-btn>
                 </v-col>
@@ -240,11 +240,7 @@ onMounted(() => {
         </v-card>
 
         <v-card variant="elevated" :color="latestMeasurementColor" v-if="showLatestMeasurement" class="mx-auto mt-5">
-            <v-row class="px-4 py-2" align="center">
-                <v-col cols="12" class="text-center">
-                    <span class="responsive-sub-title">Latest Measurement</span>
-                </v-col>
-            </v-row>
+
             <v-row class="responsive-small-negative-margin"></v-row>
             <v-row>
                 <v-col cols="12" class="text-center">
@@ -252,28 +248,45 @@ onMounted(() => {
                 </v-col>
             </v-row>
             <v-row class="responsive-print-over-image-negative-margin"></v-row>
-            <v-row>
-                <v-col cols="3" sm="4" md="5" class="text-right">
-                    <v-icon :size="displayItemSize" icon="mdi-thermometer"></v-icon>
-                </v-col>
-                <v-col cols="6" sm="4" md="2" class="d-flex align-left ">
-                    <span class="thermostat-display">{{ latestMeasurement?.insideTemperatureCelsius }}</span>
-                </v-col>
-                <v-col cols="3" sm="4" md="5" class="text-left">
-                    <v-icon :size="displayItemSize" icon="mdi-temperature-celsius"></v-icon>
+            <v-row class="px-4 py-2" align="center">
+                <v-col cols="12" class="text-center">
+                    <span class="responsive-sub-title">Latest Measurement</span>
                 </v-col>
             </v-row>
-            <v-row :class="$vuetify.display.xs ? 'reduce-margin-more' : 'reduce-margin'">
-            </v-row>
+            <v-row class="responsive-second-small-negative-margin"></v-row>
             <v-row>
-                <v-col cols="3" sm="4" md="5" class="text-right">
-                    <v-icon :size="displayItemSize" icon="mdi-water"></v-icon>
+                <v-col cols="12" class="text-center">
+                    <span class="responsive-footer-text">Retrieved At: {{ new Date(latestMeasurement?.retrievedAt ??
+                        "").toLocaleString() }}</span>
                 </v-col>
-                <v-col cols="6" sm="4" md="2" class="d-flex align-left ">
-                    <span class="thermostat-display">{{ latestMeasurement?.humidityPercentage }}</span>
-                </v-col>
-                <v-col cols="3" sm="4" md="5" class="text-left">
-                    <v-icon :size="displayItemSize" icon="mdi-percent"></v-icon>
+            </v-row>
+
+            <v-row justify="center">
+                <v-col cols="12" class="tado-display-width mx-auto">
+                    <v-row>
+                        <v-col cols="3" class="text-right">
+                            <v-icon :size="displayItemSize" icon="mdi-thermometer"></v-icon>
+                        </v-col>
+                        <v-col cols="6" class="d-flex align-left ">
+                            <span class="thermostat-display">{{ latestMeasurement?.insideTemperatureCelsius }}</span>
+                        </v-col>
+                        <v-col cols="3" class="text-left">
+                            <v-icon :size="displayItemSize" icon="mdi-temperature-celsius"></v-icon>
+                        </v-col>
+                    </v-row>
+                    <v-row :class="$vuetify.display.xs ? 'reduce-margin-more' : 'reduce-margin'">
+                    </v-row>
+                    <v-row>
+                        <v-col cols="3" class="text-right">
+                            <v-icon :size="displayItemSize" icon="mdi-water"></v-icon>
+                        </v-col>
+                        <v-col cols="6" class="d-flex align-left ">
+                            <span class="thermostat-display">{{ latestMeasurement?.humidityPercentage }}</span>
+                        </v-col>
+                        <v-col cols="3" class="text-left">
+                            <v-icon :size="displayItemSize" icon="mdi-percent"></v-icon>
+                        </v-col>
+                    </v-row>
                 </v-col>
             </v-row>
             <v-row :class="$vuetify.display.xs ? 'reduce-margin-more' : 'reduce-margin'">
@@ -286,12 +299,6 @@ onMounted(() => {
                 </v-col>
             </v-row>
             <v-row class="responsive-go-after-image-margin"></v-row>
-            <v-row>
-                <v-col cols="12" class="text-center">
-                    <span class="responsive-footer-text">Retrieved At: {{ new Date(latestMeasurement?.retrievedAt ??
-                        "").toLocaleString() }}</span>
-                </v-col>
-            </v-row>
         </v-card>
 
         <v-card variant="elevated" :color="currentScheduleColor" v-if="canEditCurrentSchedule" class="mx-auto mt-5"
@@ -320,7 +327,7 @@ onMounted(() => {
                         <span class="responsive-body-text">Interval: </span><br />
                         <span class="responsive-body-value-text">{{ currentSchedule?.interval }} minutes</span>
                     </p>
-                                        <p>
+                    <p>
                         <span class="responsive-body-text">Last Retrieval: </span><br />
                         <span class="responsive-body-value-text">{{ currentSchedule?.lastRetrievalTimeString }}</span>
                     </p>
@@ -412,19 +419,27 @@ onMounted(() => {
 }
 
 .responsive-small-negative-margin {
-    --v-col-gap-y: -65px;
+    margin-top: -50px;
+}
+
+.responsive-second-small-negative-margin {
+    margin-top: -30px;
 }
 
 .tado-display {
     height: 390px;
 }
 
+.tado-display-width {
+    max-width: 400px;
+}
+
 .responsive-print-over-image-negative-margin {
-    --v-col-gap-y: -318px;
+    --v-col-gap-y: -368px;
 }
 
 .responsive-go-after-image-margin {
-    --v-col-gap-y: 20px;
+    --v-col-gap-y: 30px;
 }
 
 .thermostat-display {
@@ -436,7 +451,7 @@ onMounted(() => {
     text-shadow: 0 0 5px yellow;
 
     font-size: 3rem;
-    margin-bottom: 14px;
+    margin-bottom: -2px;
     margin-top: -18px;
 }
 
@@ -461,19 +476,19 @@ onMounted(() => {
     }
 
     .responsive-body-text {
-    opacity: 0.7;
-    font-size: 1.1rem;
-    font-weight: 400;
-    line-height: 1.25rem;
-    letter-spacing: 0;
-}
+        opacity: 0.7;
+        font-size: 1.1rem;
+        font-weight: 400;
+        line-height: 1.25rem;
+        letter-spacing: 0;
+    }
 
-.responsive-body-value-text {
-    font-size: 1.1rem;
-    font-weight: 400;
-    line-height: 1.25rem;
-    letter-spacing: 0;
-}
+    .responsive-body-value-text {
+        font-size: 1.1rem;
+        font-weight: 400;
+        line-height: 1.25rem;
+        letter-spacing: 0;
+    }
 
     .responsive-footer-text {
         font-size: 1rem;
@@ -487,24 +502,32 @@ onMounted(() => {
     }
 
     .responsive-small-negative-margin {
-        --v-col-gap-y: -37px;
+        margin-top: -20px;
+    }
+
+    .responsive-second-small-negative-margin {
+        margin-top: -20px;
     }
 
     .tado-display {
         height: 440px;
     }
 
+    .tado-display-width {
+        max-width: 450px;
+    }
+
     .responsive-print-over-image-negative-margin {
-        --v-col-gap-y: -320px;
+        --v-col-gap-y: -430px;
     }
 
     .responsive-go-after-image-margin {
-        --v-col-gap-y: 15px;
+        --v-col-gap-y: 45px;
     }
 
     .thermostat-display {
         font-size: 4rem;
-        margin-bottom: -13px;
+        margin-bottom: -3px;
         margin-top: -20px;
     }
 }
@@ -529,20 +552,20 @@ onMounted(() => {
         letter-spacing: 0;
     }
 
-        .responsive-body-text {
-    opacity: 0.7;
-    font-size: 1.2rem;
-    font-weight: 400;
-    line-height: 1.5rem;
-    letter-spacing: 0;
-}
+    .responsive-body-text {
+        opacity: 0.7;
+        font-size: 1.2rem;
+        font-weight: 400;
+        line-height: 1.5rem;
+        letter-spacing: 0;
+    }
 
-.responsive-body-value-text {
-    font-size: 1.2rem;
-    font-weight: 400;
-    line-height: 1.5rem;
-    letter-spacing: 0;
-}
+    .responsive-body-value-text {
+        font-size: 1.2rem;
+        font-weight: 400;
+        line-height: 1.5rem;
+        letter-spacing: 0;
+    }
 
     .responsive-footer-text {
         font-size: 1.375rem;
@@ -563,18 +586,22 @@ onMounted(() => {
         height: 450px;
     }
 
+    .tado-display-width {
+        max-width: 460px;
+    }
+
     .responsive-print-over-image-negative-margin {
-        --v-col-gap-y: -360px;
+        --v-col-gap-y: -440px;
     }
 
     .thermostat-display {
         font-size: 4.1rem;
-        margin-bottom: 6px;
+        margin-bottom: -7px;
         margin-top: -20px;
     }
 
     .responsive-go-after-image-margin {
-        --v-col-gap-y: 10px;
+        --v-col-gap-y: 45px;
     }
 }
 
@@ -598,20 +625,20 @@ onMounted(() => {
         letter-spacing: 0;
     }
 
-            .responsive-body-text {
-    opacity: 0.7;
-    font-size: 1.8rem;
-    font-weight: 400;
-    line-height: 2.5rem;
-    letter-spacing: 0;
-}
+    .responsive-body-text {
+        opacity: 0.7;
+        font-size: 1.8rem;
+        font-weight: 400;
+        line-height: 2.5rem;
+        letter-spacing: 0;
+    }
 
-.responsive-body-value-text {
-    font-size: 1.8rem;
-    font-weight: 400;
-    line-height: 2.5rem;
-    letter-spacing: 0;
-}
+    .responsive-body-value-text {
+        font-size: 1.8rem;
+        font-weight: 400;
+        line-height: 2.5rem;
+        letter-spacing: 0;
+    }
 
     .responsive-footer-text {
         font-size: 1.5rem;
@@ -632,18 +659,22 @@ onMounted(() => {
         height: 600px;
     }
 
+    .tado-display-width {
+        max-width: 610px;
+    }
+
     .responsive-print-over-image-negative-margin {
-        --v-col-gap-y: -500px;
+        --v-col-gap-y: -580px;
     }
 
     .responsive-go-after-image-margin {
-        --v-col-gap-y: 22px;
+        --v-col-gap-y: 62px;
     }
 
     .thermostat-display {
         font-size: 5.5rem;
         font-weight: 500;
-        margin-bottom: 28px;
+        margin-bottom: 8px;
         margin-top: -23px;
     }
 }
@@ -667,20 +698,20 @@ onMounted(() => {
         letter-spacing: 0;
     }
 
-                .responsive-body-text {
-    opacity: 0.7;
-    font-size: 2.5rem;
-    font-weight: 400;
-    line-height: 3rem;
-    letter-spacing: 0.05rem;
-}
+    .responsive-body-text {
+        opacity: 0.7;
+        font-size: 2.5rem;
+        font-weight: 400;
+        line-height: 3rem;
+        letter-spacing: 0.05rem;
+    }
 
-.responsive-body-value-text {
-    font-size: 2.5rem;
-    font-weight: 400;
-    line-height: 3rem;
-    letter-spacing: 0.05rem;
-}
+    .responsive-body-value-text {
+        font-size: 2.5rem;
+        font-weight: 400;
+        line-height: 3rem;
+        letter-spacing: 0.05rem;
+    }
 
     .responsive-footer-text {
         font-size: 2rem;
@@ -701,8 +732,12 @@ onMounted(() => {
         height: 800px;
     }
 
+    .tado-display-width {
+        max-width: 820px;
+    }
+
     .responsive-print-over-image-negative-margin {
-        --v-col-gap-y: -630px;
+        --v-col-gap-y: -750px;
     }
 
     .responsive-go-after-image-margin {
@@ -712,7 +747,7 @@ onMounted(() => {
     .thermostat-display {
         font-size: 8rem;
         font-weight: 500;
-        margin-bottom: 19px;
+        margin-bottom: 13px;
         margin-top: -36px;
     }
 }
@@ -737,19 +772,19 @@ onMounted(() => {
     }
 
     .responsive-body-text {
-    opacity: 0.7;
-    font-size: 2.8rem;
-    font-weight: 400;
-    line-height: 3.5rem;
-    letter-spacing: 0.05rem;
-}
+        opacity: 0.7;
+        font-size: 2.8rem;
+        font-weight: 400;
+        line-height: 3.5rem;
+        letter-spacing: 0.05rem;
+    }
 
-.responsive-body-value-text {
-    font-size: 2.8rem;
-    font-weight: 400;
-    line-height: 3.5rem;
-    letter-spacing: 0.05rem;
-}
+    .responsive-body-value-text {
+        font-size: 2.8rem;
+        font-weight: 400;
+        line-height: 3.5rem;
+        letter-spacing: 0.05rem;
+    }
 
     .responsive-footer-text {
         font-size: 2.25rem;
@@ -770,8 +805,16 @@ onMounted(() => {
         height: 1100px;
     }
 
+    .tado-display-width {
+        max-width: 1140px;
+    }
+
     .responsive-print-over-image-negative-margin {
-        --v-col-gap-y: -850px;
+        --v-col-gap-y: -1000px;
+    }
+
+        .responsive-go-after-image-margin {
+        --v-col-gap-y: 115px;
     }
 
     .thermostat-display {
