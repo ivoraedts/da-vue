@@ -1,12 +1,50 @@
 <script setup lang="ts">
 import { ref, type Ref, onMounted, computed } from 'vue'
+import { useDisplay } from 'vuetify'
 import InitializeTracking from '@/components/InitializeTracking.vue'
 import ScheduleEditor from '@/components/sections/ScheduleEditor.vue'
 import DataExplorer from '@/components/sections/DataExplorer.vue'
 import type { TadoRetrievalScheduleModel } from '@/models/TadoRetrievalScheduleModel';
 import type { DataMeasureMents } from '@/models/DataMeasureMents';
 import { getMaterialColorForTemperature } from '@/utils/TemperatureDisplay';
+import logoSmall from '@/assets/LogoIncludingTado-small.png'
+import logoMedium from '@/assets/LogoIncludingTado-medium.png'
+import logoLarge from '@/assets/LogoIncludingTado-large.png'
+import tadoSmall from '@/assets/tado-small.png'
+import tadoMedium from '@/assets/tado-medium.png'
+import tadoLarge from '@/assets/tado-large.png'
 
+const { name } = useDisplay()
+
+const logoSrc = computed(() => {
+    switch (name.value) {
+        case 'xs':
+        case 'sm':
+        case 'md':
+            return logoSmall
+        case 'lg':
+            return logoMedium
+        case 'xl':
+        case 'xxl':
+        default:
+            return logoLarge
+    }
+})
+
+const tadoSrc = computed(() => {
+    switch (name.value) {
+        case 'xs':
+        case 'sm':
+        case 'md':
+            return tadoSmall
+        case 'lg':
+        case 'xl':
+            return tadoMedium
+        case 'xxl':
+        default:
+            return tadoLarge
+    }
+})
 const showSection: Ref<string, string> = ref("overview");
 
 function showOverview() {
@@ -141,28 +179,13 @@ onMounted(() => {
         <v-card variant="elevated" color="primary" class="mx-auto" max-width="100%">
             <v-row>
                 <v-col cols="12" class="text-center">
-                    <v-img v-if="$vuetify.display.xs" height="150" src="@/assets/LogoIncludingTado-small.png" />
-                    <v-img v-if="$vuetify.display.sm" height="200" src="@/assets/LogoIncludingTado-small.png" />
-                    <v-img v-if="$vuetify.display.md" height="250" src="@/assets/LogoIncludingTado-small.png" />
-                    <v-img v-if="$vuetify.display.lg" height="300" src="@/assets/LogoIncludingTado-medium.png" />
-                    <v-img v-if="$vuetify.display.xl" height="350" src="@/assets/LogoIncludingTado-large.png" />
-                    <v-img v-if="$vuetify.display.xxl" height="400" src="@/assets/LogoIncludingTado-large.png" />
+                    <v-img class="responsive-logo" :src="logoSrc" />
                 </v-col>
             </v-row>
-            <v-row v-if="$vuetify.display.xs" class="pre-header-margin-xs"></v-row>
-            <v-row v-if="$vuetify.display.sm" class="pre-header-margin-sm"></v-row>
-            <v-row v-if="$vuetify.display.md" class="pre-header-margin-md"></v-row>
-            <v-row v-if="$vuetify.display.lg" class="pre-header-margin-lg"></v-row>
-            <v-row v-if="$vuetify.display.xl" class="pre-header-margin-xl"></v-row>
-            <v-row v-if="$vuetify.display.xxl" class="pre-header-margin-xxl"></v-row>
+            <v-row class="pre-header-margin"></v-row>
             <v-row>
                 <v-col cols="12" class="text-center">
-                    <span v-if="$vuetify.display.xs" class="text-headline-large">Da Home Page</span>
-                    <span v-if="$vuetify.display.sm" class="text-display-small">Da Home Page</span>
-                    <span v-if="$vuetify.display.md" class="text-display-medium">Da Home Page</span>
-                    <span v-if="$vuetify.display.lg" class="text-display-large">Da Home Page</span>
-                    <span v-if="$vuetify.display.xl" class="text-groovy-header-small">Da Home Page</span>
-                    <span v-if="$vuetify.display.xxl" class="text-groovy-header-large">Da Home Page</span>
+                    <span class="responsive-home-title">Da Home Page</span>
                 </v-col>
             </v-row>
         </v-card>
@@ -180,34 +203,13 @@ onMounted(() => {
         <v-card variant="elevated" :color="latestMeasurementColor" v-if="showLatestMeasurement" class="mx-auto mt-5">
             <v-row class="px-4 py-2" align="center">
                 <v-col cols="12" class="text-center">
-                    <span v-if="$vuetify.display.xs" class="text-title-small">Latest Measurement</span>
-                    <span v-if="$vuetify.display.sm" class="text-title-large">Latest Measurement</span>
-                    <span v-if="$vuetify.display.md" class="text-headline-small">Latest Measurement</span>
-                    <span v-if="$vuetify.display.lg" class="text-headline-large">Latest Measurement</span>
-                    <span v-if="$vuetify.display.xl" class="text-display-small">Latest Measurement</span>
-                    <span v-if="$vuetify.display.xxl" class="text-display-large">Latest Measurement</span>
+                    <span class="responsive-sub-title">Latest Measurement</span>
                 </v-col>
             </v-row>
-                        <v-row v-if="$vuetify.display.xs" class="small-negative-margin-xs"></v-row>
-            <v-row v-if="$vuetify.display.sm" class="small-negative-margin-sm"></v-row>
-            <v-row v-if="$vuetify.display.md" class="small-negative-margin-md"></v-row>
-            <v-row v-if="$vuetify.display.lg" class="small-negative-margin-lg"></v-row>
-            <v-row v-if="$vuetify.display.xl" class="small-negative-margin-xl"></v-row>
-            <v-row v-if="$vuetify.display.xxl" class="small-negative-margin-xxl"></v-row>
+            <v-row class="responsive-small-negative-margin"></v-row>
             <v-row>
                 <v-col cols="12" class="text-center">
-                    <v-img v-if="$vuetify.display.xs" height="390" src="@/assets/tado-small.png"
-                        class="dont-print-on-front" />
-                    <v-img v-if="$vuetify.display.sm" height="440" src="@/assets/tado-small.png"
-                        class="dont-print-on-front" />
-                    <v-img v-if="$vuetify.display.md" height="450" src="@/assets/tado-small.png"
-                        class="dont-print-on-front" />
-                    <v-img v-if="$vuetify.display.lg" height="600" src="@/assets/tado-medium.png"
-                        class="dont-print-on-front" />
-                    <v-img v-if="$vuetify.display.xl" height="800" src="@/assets/tado-medium.png"
-                        class="dont-print-on-front" />
-                    <v-img v-if="$vuetify.display.xxl" height="1100" src="@/assets/tado-large.png"
-                        class="dont-print-on-front" />
+                    <v-img class="tado-display dont-print-on-front" :src="tadoSrc" />
                 </v-col>
             </v-row>
             <v-row v-if="$vuetify.display.xs" class="huge-negative-margin-xs"></v-row>
@@ -373,29 +375,203 @@ onMounted(() => {
     </div>
 </template>
 
+
+
+
+
 <style scoped>
-.pre-header-margin-xs {
+/* Mobile First Defaults (xs) */
+.pre-header-margin {
     --v-col-gap-y: -30px;
 }
 
-.pre-header-margin-sm {
-    --v-col-gap-y: -30px;
+.responsive-home-title {
+    font-size: 2rem;
+    font-weight: 400;
+    line-height: 2.5rem;
+    letter-spacing: 0;
 }
 
-.pre-header-margin-md {
-    --v-col-gap-y: -30px;
+.responsive-sub-title {
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    letter-spacing: 0.00625rem;
 }
 
-.pre-header-margin-lg {
-    --v-col-gap-y: -30px;
+.responsive-logo {
+    height: 150px;
 }
 
-.pre-header-margin-xl {
-    --v-col-gap-y: -30px;
+.responsive-small-negative-margin {
+    --v-col-gap-y: -65px;
 }
 
-.pre-header-margin-xxl {
-    --v-col-gap-y: -35px;
+.tado-display {
+    height: 390px;
+}
+
+/* Small screens (sm) and up */
+@media (min-width: 600px) {
+    .pre-header-margin {
+        --v-col-gap-y: -30px;
+    }
+
+    .responsive-home-title {
+        font-size: 2.25rem;
+        font-weight: 400;
+        line-height: 2.75rem;
+        letter-spacing: 0;
+    }
+
+    .responsive-sub-title {
+        font-size: 1.375rem;
+        font-weight: 400;
+        line-height: 1.75rem;
+        letter-spacing: 0;
+    }
+
+    .responsive-logo {
+        height: 200px;
+    }
+
+    .responsive-small-negative-margin {
+        --v-col-gap-y: -37px;
+    }
+
+    .tado-display {
+        height: 440px;
+    }
+}
+
+/* Medium screens (md) and up */
+@media (min-width: 960px) {
+    .pre-header-margin {
+        --v-col-gap-y: -30px;
+    }
+
+    .responsive-home-title {
+        font-size: 2.8125rem;
+        font-weight: 400;
+        line-height: 3.25rem;
+        letter-spacing: 0;
+    }
+
+    .responsive-sub-title {
+        font-size: 1.5rem;
+        font-weight: 400;
+        line-height: 2rem;
+        letter-spacing: 0;
+    }
+
+    .responsive-logo {
+        height: 250px;
+    }
+
+    .responsive-small-negative-margin {
+        --v-col-gap-y: -37px;
+    }
+
+    .tado-display {
+        height: 450px;
+    }
+}
+
+/* Large screens (lg) and up */
+@media (min-width: 1280px) {
+    .pre-header-margin {
+        --v-col-gap-y: -30px;
+    }
+
+    .responsive-home-title {
+        font-size: 3.5625rem;
+        font-weight: 400;
+        line-height: 4rem;
+        letter-spacing: -0.015625rem;
+    }
+
+    .responsive-sub-title {
+        font-size: 2rem;
+        font-weight: 400;
+        line-height: 2.5rem;
+        letter-spacing: 0;
+    }
+
+    .responsive-logo {
+        height: 300px;
+    }
+
+    .responsive-small-negative-margin {
+        --v-col-gap-y: -42px;
+    }
+
+    .tado-display {
+        height: 600px;
+    }
+}
+
+/* Extra Large (xl) and up */
+@media (min-width: 1904px) {
+    .pre-header-margin {
+        --v-col-gap-y: -30px;
+    }
+
+    .responsive-home-title {
+        font-size: 4rem;
+        font-weight: 450;
+        line-height: 4.5rem;
+    }
+
+    .responsive-sub-title {
+        font-size: 2.25rem;
+        font-weight: 400;
+        line-height: 2.75rem;
+        letter-spacing: 0;
+    }
+
+    .responsive-logo {
+        height: 350px;
+    }
+
+    .responsive-small-negative-margin {
+        --v-col-gap-y: -45px;
+    }
+
+    .tado-display {
+        height: 800px;
+    }
+}
+
+/* Ultra Large (xxl) */
+@media (min-width: 2560px) {
+    .pre-header-margin {
+        --v-col-gap-y: -35px;
+    }
+
+    .responsive-home-title {
+        font-size: 5.5rem;
+        font-weight: 500;
+        line-height: 6rem;
+    }
+
+    .responsive-sub-title {
+        font-size: 3.5625rem;
+        font-weight: 400;
+        line-height: 4rem;
+        letter-spacing: -0.015625rem;
+    }
+
+    .responsive-logo {
+        height: 400px;
+    }
+
+    .responsive-small-negative-margin {
+        --v-col-gap-y: -55px;
+    }
+
+    .tado-display {
+        height: 1100px;
+    }
 }
 
 .reduce-margin {
@@ -404,30 +580,6 @@ onMounted(() => {
 
 .reduce-margin-more {
     --v-col-gap-y: 1px;
-}
-
-.small-negative-margin-xs {
-    --v-col-gap-y: -65px;
-}
-
-.small-negative-margin-sm {
-    --v-col-gap-y: -37px;
-}
-
-.small-negative-margin-md {
-    --v-col-gap-y: -37px;
-}
-
-.small-negative-margin-lg {
-    --v-col-gap-y: -42px;
-}
-
-.small-negative-margin-xl {
-    --v-col-gap-y: -45px;
-}
-
-.small-negative-margin-xxl {
-    --v-col-gap-y: -55px;
 }
 
 .huge-negative-margin-xs {
@@ -519,17 +671,5 @@ onMounted(() => {
     padding: 1rem !important;
     border-radius: 50%;
     /* Re-creates the circular look */
-}
-
-.text-groovy-header-small {
-    font-size: 4rem;
-    font-weight: 450;
-    line-height: 4.5rem;
-}
-
-.text-groovy-header-large {
-    font-size: 5.5rem;
-    font-weight: 500;
-    line-height: 6rem;
 }
 </style>
